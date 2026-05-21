@@ -4,10 +4,16 @@ const cors = require('cors');
 
 const app = express();
 
+// Allow all origins — works on Vercel serverless
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
-  credentials: true
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Handle preflight
+app.options('*', cors());
+
 app.use(express.json());
 
 // Routes
@@ -21,7 +27,10 @@ app.use('/api/upload', require('./routes/upload'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`ILMS Server running on port ${PORT}`));
+// Only listen when running locally — Vercel handles this in prod
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => console.log(`ILMS Server running on port ${PORT}`));
+}
 
 module.exports = app;

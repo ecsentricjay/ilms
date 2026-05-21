@@ -15,32 +15,28 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // Create Supabase auth user
+    // Step 1: Create auth user
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
-      email_confirm: true
+      email_confirm: true,
     });
 
     if (authError) {
+      console.error('Auth error:', authError);
       return res.status(400).json({ error: authError.message });
     }
 
-    // Insert into users table
+    // Step 2: Insert into users table
     const { data: user, error: dbError } = await supabase
       .from('users')
-      .insert({
-        id: authData.user.id,
-        full_name,
-        email,
-        role,
-        is_active: true
-      })
+      .insert({ id: authData.user.id, full_name, email, role, is_active: true })
       .select()
       .single();
 
     if (dbError) {
-      // Rollback auth user
+      console.error('DB error:', dbError);
+      // Rollback the auth user
       await supabase.auth.admin.deleteUser(authData.user.id);
       return res.status(400).json({ error: dbError.message });
     }
@@ -51,10 +47,13 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.status(201).json({ token, user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role } });
+    res.status(201).json({
+      token,
+      user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role }
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Register exception:', err);
+    res.status(500).json({ error: err.message || 'Server error during registration' });
   }
 });
 
@@ -67,14 +66,18 @@ router.post('/login', async (req, res) => {
   }
 
   try {
-    // Sign in via Supabase auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    // Step 1: Sign in via Supabase
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (authError) {
+      console.error('Login auth error:', authError);
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // Get user from our users table
+    // Step 2: Fetch user profile
     const { data: user, error: dbError } = await supabase
       .from('users')
       .select('*')
@@ -82,7 +85,8 @@ router.post('/login', async (req, res) => {
       .single();
 
     if (dbError || !user) {
-      return res.status(401).json({ error: 'User record not found' });
+      console.error('Login DB error:', dbError);
+      return res.status(401).json({ error: 'User profile not found. Please contact admin.' });
     }
 
     if (!user.is_active) {
@@ -95,10 +99,13 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.json({ token, user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role } });
+    res.json({
+      token,
+      user: { id: user.id, full_name: user.full_name, email: user.email, role: user.role }
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Login exception:', err);
+    res.status(500).json({ error: err.message || 'Server error during login' });
   }
 });
 
