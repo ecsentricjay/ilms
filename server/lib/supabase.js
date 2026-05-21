@@ -1,6 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const WebSocket = require('ws');
-
 require('dotenv').config();
 
 const supabase = createClient(
@@ -9,10 +7,15 @@ const supabase = createClient(
   {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
+      persistSession: false,
+      detectSessionInUrl: false,
     },
     realtime: {
-      transport: WebSocket
+      // Disable realtime to avoid 'ws' module dependency on serverless
+      params: { eventsPerSecond: 0 }
+    },
+    global: {
+      headers: { 'x-my-custom-header': 'ilms-server' }
     }
   }
 );
