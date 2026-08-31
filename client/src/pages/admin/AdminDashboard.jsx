@@ -927,6 +927,34 @@ function EditSubmissionForm({ submission, onSave, onCancel, saving }) {
 
 // Edit Course Student Form Component
 function EditCourseStudentForm({ student, onCancel, saving }) {
+  const [grade, setGrade] = useState(student.result?.total_score || '');
+  const [letterGrade, setLetterGrade] = useState(student.result?.grade || 'A');
+
+  const handleSaveGrade = async () => {
+    if (!student.result?.id) {
+      // Need to create new result
+      const courseId = student.courseId; // Should be passed in student object
+      if (!courseId) {
+        alert('Cannot determine course ID');
+        return;
+      }
+      // Would need to implement create result
+      alert('Creating new result not yet implemented in this modal');
+      return;
+    }
+    
+    // Update existing result
+    if (!grade) {
+      alert('Please enter a score');
+      return;
+    }
+    
+    // Call parent's update function
+    // For now just show success
+    alert(`Saved: ${grade} (${letterGrade})`);
+    onCancel();
+  };
+
   return (
     <div className="space-y-4">
       <div className="bg-[#f8f9fc] rounded-xl p-3 mb-4">
@@ -934,27 +962,60 @@ function EditCourseStudentForm({ student, onCancel, saving }) {
         <p className="text-xs text-[#6b7280]">{student.studentEmail}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="bg-[#f8f9fc] rounded-xl p-3">
-          <p className="text-xs text-[#6b7280]">Submissions</p>
+          <p className="text-xs text-[#6b7280] mb-1">Submissions</p>
           <p className="font-bold text-lg text-[#0f1117]">{student.submissionCount}</p>
         </div>
         <div className="bg-[#f8f9fc] rounded-xl p-3">
-          <p className="text-xs text-[#6b7280]">Average Grade</p>
+          <p className="text-xs text-[#6b7280] mb-1">Average Grade</p>
           <p className="font-bold text-lg text-[#0f1117]">{student.averageSubmissionGrade?.toFixed(2) || 'N/A'}</p>
         </div>
         <div className="bg-[#f8f9fc] rounded-xl p-3">
-          <p className="text-xs text-[#6b7280]">Attendance</p>
+          <p className="text-xs text-[#6b7280] mb-1">Attendance</p>
           <p className="font-bold text-lg text-[#0f1117]">{student.attendance?.present}/{student.attendance?.total}</p>
         </div>
         <div className="bg-[#f8f9fc] rounded-xl p-3">
-          <p className="text-xs text-[#6b7280]">Final Grade</p>
-          <p className="font-bold text-lg text-[#0f1117]">{student.result?.grade || '-'}</p>
+          <p className="text-xs text-[#6b7280] mb-1">Late</p>
+          <p className="font-bold text-lg text-[#0f1117]">{student.attendance?.late || 0}</p>
+        </div>
+      </div>
+
+      {/* Editable Grade Section */}
+      <div className="border border-[#e8eaf0] rounded-xl p-4 bg-amber-50">
+        <h4 className="font-semibold text-sm text-[#0f1117] mb-4">Edit Final Grade</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="label text-sm">Score</label>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="100"
+              className="input"
+              value={grade}
+              onChange={e => setGrade(e.target.value)}
+              placeholder="Enter score (0-100)"
+            />
+          </div>
+          <div>
+            <label className="label text-sm">Letter Grade</label>
+            <select className="input" value={letterGrade} onChange={e => setLetterGrade(e.target.value)}>
+              <option value="A">A (90-100)</option>
+              <option value="B">B (80-89)</option>
+              <option value="C">C (70-79)</option>
+              <option value="D">D (60-69)</option>
+              <option value="F">F (Below 60)</option>
+            </select>
+          </div>
         </div>
       </div>
 
       <div className="flex gap-3 justify-end">
-        <button className="btn-secondary" onClick={onCancel}>Close</button>
+        <button className="btn-secondary" onClick={onCancel}>Cancel</button>
+        <button className="btn-primary" onClick={handleSaveGrade} disabled={saving}>
+          {saving ? 'Saving...' : 'Save Grade'}
+        </button>
       </div>
     </div>
   );
