@@ -20,15 +20,15 @@
 -- SAMPLE TEST DATA (Replace these UUIDs with actual ones)
 -- ============================================================
 -- For testing purposes, here are UUID format examples:
--- Admin:     863e3a48-4e95-4fcd-8d90-b7297a85d9ea
--- Lecturer1: fccbbbc5-a125-45c9-934e-fcddd4186f9d
--- Lecturer2: 059f42de-9666-4df2-971c-789f2133da36
--- Lecturer3: 75381bc2-4451-48c5-b221-caea47a47d78
--- Student1:  19466a5c-80fa-4225-8536-28b2623f5b1b
--- Student2:  855ed085-8117-477c-8591-7eac60094918
--- Student3:  a290b900-e259-4e6d-802b-ab000ebd8b6b
--- Student4:  8391a5ff-4dba-42db-8a19-a861e50cf49a
--- Student5:  a9c28497-7b1f-45f5-b7f2-49e96ffbe075
+-- Admin:     550e8400-e29b-41d4-a716-446655440001
+-- Lecturer1: 550e8400-e29b-41d4-a716-446655440002
+-- Lecturer2: 550e8400-e29b-41d4-a716-446655440003
+-- Lecturer3: 550e8400-e29b-41d4-a716-446655440004
+-- Student1:  550e8400-e29b-41d4-a716-446655440005
+-- Student2:  550e8400-e29b-41d4-a716-446655440006
+-- Student3:  550e8400-e29b-41d4-a716-446655440007
+-- Student4:  550e8400-e29b-41d4-a716-446655440008
+-- Student5:  550e8400-e29b-41d4-a716-446655440009
 
 -- ============================================================
 -- 1. USERS TABLE - Insert actual users
@@ -37,19 +37,19 @@
 
 INSERT INTO public.users (id, full_name, email, role, is_active, created_at) VALUES
   -- Admin
-  ('863e3a48-4e95-4fcd-8d90-b7297a85d9ea', 'Admin User', 'admin@ilms.edu', 'admin', true, now()),
+  ('550e8400-e29b-41d4-a716-446655440001', 'Admin User', 'admin@ilms.edu', 'admin', true, now()),
 
   -- Lecturers
-  ('fccbbbc5-a125-45c9-934e-fcddd4186f9d', 'Dr. John Okafor', 'john.okafor@ilms.edu', 'lecturer', true, now() - interval '60 days'),
-  ('059f42de-9666-4df2-971c-789f2133da36', 'Prof. Ada Eze', 'ada.eze@ilms.edu', 'lecturer', true, now() - interval '45 days'),
-  ('75381bc2-4451-48c5-b221-caea47a47d78', 'Dr. Emeka Nnamdi', 'emeka.nnamdi@ilms.edu', 'lecturer', true, now() - interval '30 days'),
+  ('550e8400-e29b-41d4-a716-446655440002', 'Dr. John Okafor', 'john.okafor@ilms.edu', 'lecturer', true, now() - interval '60 days'),
+  ('550e8400-e29b-41d4-a716-446655440003', 'Prof. Ada Eze', 'ada.eze@ilms.edu', 'lecturer', true, now() - interval '45 days'),
+  ('550e8400-e29b-41d4-a716-446655440004', 'Dr. Emeka Nnamdi', 'emeka.nnamdi@ilms.edu', 'lecturer', true, now() - interval '30 days'),
 
   -- Students
-  ('19466a5c-80fa-4225-8536-28b2623f5b1b', 'Chidi Nwosu', 'chidi.nwosu@student.edu', 'student', true, now() - interval '90 days'),
-  ('855ed085-8117-477c-8591-7eac60094918', 'Amaka Obiora', 'amaka.obiora@student.edu', 'student', true, now() - interval '85 days'),
-  ('a290b900-e259-4e6d-802b-ab000ebd8b6b', 'Ikechukwu Obi', 'ikechukwu.obi@student.edu', 'student', true, now() - interval '80 days'),
-  ('8391a5ff-4dba-42db-8a19-a861e50cf49a', 'Blessing Okoro', 'blessing.okoro@student.edu', 'student', true, now() - interval '75 days'),
-  ('a9c28497-7b1f-45f5-b7f2-49e96ffbe075', 'Zainab Ibrahim', 'zainab.ibrahim@student.edu', 'student', true, now() - interval '70 days')
+  ('550e8400-e29b-41d4-a716-446655440005', 'Chidi Nwosu', 'chidi.nwosu@student.edu', 'student', true, now() - interval '90 days'),
+  ('550e8400-e29b-41d4-a716-446655440006', 'Amaka Obiora', 'amaka.obiora@student.edu', 'student', true, now() - interval '85 days'),
+  ('550e8400-e29b-41d4-a716-446655440007', 'Ikechukwu Obi', 'ikechukwu.obi@student.edu', 'student', true, now() - interval '80 days'),
+  ('550e8400-e29b-41d4-a716-446655440008', 'Blessing Okoro', 'blessing.okoro@student.edu', 'student', true, now() - interval '75 days'),
+  ('550e8400-e29b-41d4-a716-446655440009', 'Zainab Ibrahim', 'zainab.ibrahim@student.edu', 'student', true, now() - interval '70 days')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -58,11 +58,11 @@ ON CONFLICT (id) DO NOTHING;
 -- DELETE FROM public.courses; -- Uncomment to clear existing data first
 
 INSERT INTO public.courses (id, course_title, course_code, description, semester, lecturer_id, created_at) VALUES
-  ('650e8400-e29b-41d4-a716-446655440001', 'Introduction to Programming', 'CS 101', 'Fundamentals of programming using Python', '2024/2025 First Semester', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d', now() - interval '60 days'),
-  ('650e8400-e29b-41d4-a716-446655440002', 'Database Systems', 'CS 301', 'Design and implementation of databases', '2024/2025 First Semester', '059f42de-9666-4df2-971c-789f2133da36', now() - interval '60 days'),
-  ('650e8400-e29b-41d4-a716-446655440003', 'Web Development', 'CS 201', 'Frontend and backend web technologies', '2024/2025 First Semester', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d', now() - interval '55 days'),
-  ('650e8400-e29b-41d4-a716-446655440004', 'Data Structures', 'CS 102', 'Arrays, lists, trees, and graphs', '2024/2025 First Semester', '75381bc2-4451-48c5-b221-caea47a47d78', now() - interval '50 days'),
-  ('650e8400-e29b-41d4-a716-446655440005', 'Discrete Mathematics', 'MATH 201', 'Sets, logic, and combinatorics', '2024/2025 First Semester', '75381bc2-4451-48c5-b221-caea47a47d78', now() - interval '50 days')
+  ('650e8400-e29b-41d4-a716-446655440001', 'Introduction to Programming', 'CS 101', 'Fundamentals of programming using Python', '2024/2025 First Semester', '550e8400-e29b-41d4-a716-446655440002', now() - interval '60 days'),
+  ('650e8400-e29b-41d4-a716-446655440002', 'Database Systems', 'CS 301', 'Design and implementation of databases', '2024/2025 First Semester', '550e8400-e29b-41d4-a716-446655440003', now() - interval '60 days'),
+  ('650e8400-e29b-41d4-a716-446655440003', 'Web Development', 'CS 201', 'Frontend and backend web technologies', '2024/2025 First Semester', '550e8400-e29b-41d4-a716-446655440002', now() - interval '55 days'),
+  ('650e8400-e29b-41d4-a716-446655440004', 'Data Structures', 'CS 102', 'Arrays, lists, trees, and graphs', '2024/2025 First Semester', '550e8400-e29b-41d4-a716-446655440004', now() - interval '50 days'),
+  ('650e8400-e29b-41d4-a716-446655440005', 'Discrete Mathematics', 'MATH 201', 'Sets, logic, and combinatorics', '2024/2025 First Semester', '550e8400-e29b-41d4-a716-446655440004', now() - interval '50 days')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -72,28 +72,28 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.enrolments (id, student_id, course_id, enrolled_at) VALUES
   -- Chidi enrolled in multiple courses
-  ('750e8400-e29b-41d4-a716-446655440001', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440001', now() - interval '45 days'),
-  ('750e8400-e29b-41d4-a716-446655440002', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440002', now() - interval '45 days'),
-  ('750e8400-e29b-41d4-a716-446655440003', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440003', now() - interval '40 days'),
-  ('750e8400-e29b-41d4-a716-446655440004', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440004', now() - interval '40 days'),
+  ('750e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440001', now() - interval '45 days'),
+  ('750e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440002', now() - interval '45 days'),
+  ('750e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440003', now() - interval '40 days'),
+  ('750e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440004', now() - interval '40 days'),
 
   -- Amaka enrolled in multiple courses
-  ('750e8400-e29b-41d4-a716-446655440005', '855ed085-8117-477c-8591-7eac60094918', '650e8400-e29b-41d4-a716-446655440001', now() - interval '45 days'),
-  ('750e8400-e29b-41d4-a716-446655440006', '855ed085-8117-477c-8591-7eac60094918', '650e8400-e29b-41d4-a716-446655440002', now() - interval '44 days'),
-  ('750e8400-e29b-41d4-a716-446655440007', '855ed085-8117-477c-8591-7eac60094918', '650e8400-e29b-41d4-a716-446655440005', now() - interval '40 days'),
+  ('750e8400-e29b-41d4-a716-446655440005', '550e8400-e29b-41d4-a716-446655440006', '650e8400-e29b-41d4-a716-446655440001', now() - interval '45 days'),
+  ('750e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440006', '650e8400-e29b-41d4-a716-446655440002', now() - interval '44 days'),
+  ('750e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440006', '650e8400-e29b-41d4-a716-446655440005', now() - interval '40 days'),
 
   -- Ikechukwu enrolled in multiple courses
-  ('750e8400-e29b-41d4-a716-446655440008', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', '650e8400-e29b-41d4-a716-446655440001', now() - interval '42 days'),
-  ('750e8400-e29b-41d4-a716-446655440009', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', '650e8400-e29b-41d4-a716-446655440003', now() - interval '42 days'),
-  ('750e8400-e29b-41d4-a716-446655440010', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', '650e8400-e29b-41d4-a716-446655440004', now() - interval '38 days'),
+  ('750e8400-e29b-41d4-a716-446655440008', '550e8400-e29b-41d4-a716-446655440007', '650e8400-e29b-41d4-a716-446655440001', now() - interval '42 days'),
+  ('750e8400-e29b-41d4-a716-446655440009', '550e8400-e29b-41d4-a716-446655440007', '650e8400-e29b-41d4-a716-446655440003', now() - interval '42 days'),
+  ('750e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440007', '650e8400-e29b-41d4-a716-446655440004', now() - interval '38 days'),
 
   -- Blessing enrolled in courses
-  ('750e8400-e29b-41d4-a716-446655440011', '8391a5ff-4dba-42db-8a19-a861e50cf49a', '650e8400-e29b-41d4-a716-446655440002', now() - interval '40 days'),
-  ('750e8400-e29b-41d4-a716-446655440012', '8391a5ff-4dba-42db-8a19-a861e50cf49a', '650e8400-e29b-41d4-a716-446655440003', now() - interval '38 days'),
+  ('750e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440008', '650e8400-e29b-41d4-a716-446655440002', now() - interval '40 days'),
+  ('750e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440008', '650e8400-e29b-41d4-a716-446655440003', now() - interval '38 days'),
 
   -- Zainab enrolled in courses
-  ('750e8400-e29b-41d4-a716-446655440013', 'a9c28497-7b1f-45f5-b7f2-49e96ffbe075', '650e8400-e29b-41d4-a716-446655440001', now() - interval '35 days'),
-  ('750e8400-e29b-41d4-a716-446655440014', 'a9c28497-7b1f-45f5-b7f2-49e96ffbe075', '650e8400-e29b-41d4-a716-446655440002', now() - interval '34 days')
+  ('750e8400-e29b-41d4-a716-446655440013', '550e8400-e29b-41d4-a716-446655440009', '650e8400-e29b-41d4-a716-446655440001', now() - interval '35 days'),
+  ('750e8400-e29b-41d4-a716-446655440014', '550e8400-e29b-41d4-a716-446655440009', '650e8400-e29b-41d4-a716-446655440002', now() - interval '34 days')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -103,26 +103,26 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.attendance (id, student_id, course_id, session_date, status, recorded_by) VALUES
   -- Chidi's attendance in CS 101
-  ('850e8400-e29b-41d4-a716-446655440001', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440001', '2024-08-20', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
-  ('850e8400-e29b-41d4-a716-446655440002', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440001', '2024-08-21', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
-  ('850e8400-e29b-41d4-a716-446655440003', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440001', '2024-08-22', 'late', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
-  ('850e8400-e29b-41d4-a716-446655440004', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440001', '2024-08-23', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
-  ('850e8400-e29b-41d4-a716-446655440005', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440001', '2024-08-24', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
+  ('850e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440001', '2024-08-20', 'present', '550e8400-e29b-41d4-a716-446655440002'),
+  ('850e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440001', '2024-08-21', 'present', '550e8400-e29b-41d4-a716-446655440002'),
+  ('850e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440001', '2024-08-22', 'late', '550e8400-e29b-41d4-a716-446655440002'),
+  ('850e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440001', '2024-08-23', 'present', '550e8400-e29b-41d4-a716-446655440002'),
+  ('850e8400-e29b-41d4-a716-446655440005', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440001', '2024-08-24', 'present', '550e8400-e29b-41d4-a716-446655440002'),
 
   -- Chidi's attendance in CS 301
-  ('850e8400-e29b-41d4-a716-446655440006', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440002', '2024-08-20', 'present', '059f42de-9666-4df2-971c-789f2133da36'),
-  ('850e8400-e29b-41d4-a716-446655440007', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440002', '2024-08-21', 'absent', '059f42de-9666-4df2-971c-789f2133da36'),
-  ('850e8400-e29b-41d4-a716-446655440008', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440002', '2024-08-22', 'present', '059f42de-9666-4df2-971c-789f2133da36'),
+  ('850e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440002', '2024-08-20', 'present', '550e8400-e29b-41d4-a716-446655440003'),
+  ('850e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440002', '2024-08-21', 'absent', '550e8400-e29b-41d4-a716-446655440003'),
+  ('850e8400-e29b-41d4-a716-446655440008', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440002', '2024-08-22', 'present', '550e8400-e29b-41d4-a716-446655440003'),
 
   -- Amaka's attendance in CS 101
-  ('850e8400-e29b-41d4-a716-446655440009', '855ed085-8117-477c-8591-7eac60094918', '650e8400-e29b-41d4-a716-446655440001', '2024-08-20', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
-  ('850e8400-e29b-41d4-a716-446655440010', '855ed085-8117-477c-8591-7eac60094918', '650e8400-e29b-41d4-a716-446655440001', '2024-08-21', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
-  ('850e8400-e29b-41d4-a716-446655440011', '855ed085-8117-477c-8591-7eac60094918', '650e8400-e29b-41d4-a716-446655440001', '2024-08-22', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
+  ('850e8400-e29b-41d4-a716-446655440009', '550e8400-e29b-41d4-a716-446655440006', '650e8400-e29b-41d4-a716-446655440001', '2024-08-20', 'present', '550e8400-e29b-41d4-a716-446655440002'),
+  ('850e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440006', '650e8400-e29b-41d4-a716-446655440001', '2024-08-21', 'present', '550e8400-e29b-41d4-a716-446655440002'),
+  ('850e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440006', '650e8400-e29b-41d4-a716-446655440001', '2024-08-22', 'present', '550e8400-e29b-41d4-a716-446655440002'),
 
   -- Ikechukwu's attendance
-  ('850e8400-e29b-41d4-a716-446655440012', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', '650e8400-e29b-41d4-a716-446655440001', '2024-08-20', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
-  ('850e8400-e29b-41d4-a716-446655440013', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', '650e8400-e29b-41d4-a716-446655440001', '2024-08-21', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d'),
-  ('850e8400-e29b-41d4-a716-446655440014', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', '650e8400-e29b-41d4-a716-446655440001', '2024-08-23', 'present', 'fccbbbc5-a125-45c9-934e-fcddd4186f9d')
+  ('850e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440007', '650e8400-e29b-41d4-a716-446655440001', '2024-08-20', 'present', '550e8400-e29b-41d4-a716-446655440002'),
+  ('850e8400-e29b-41d4-a716-446655440013', '550e8400-e29b-41d4-a716-446655440007', '650e8400-e29b-41d4-a716-446655440001', '2024-08-21', 'present', '550e8400-e29b-41d4-a716-446655440002'),
+  ('850e8400-e29b-41d4-a716-446655440014', '550e8400-e29b-41d4-a716-446655440007', '650e8400-e29b-41d4-a716-446655440001', '2024-08-23', 'present', '550e8400-e29b-41d4-a716-446655440002')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -157,20 +157,20 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.submissions (id, assignment_id, student_id, file_url, grade, feedback, submitted_at) VALUES
   -- Chidi's submissions for CS 101
-  ('a50e8400-e29b-41d4-a716-446655440001', '950e8400-e29b-41d4-a716-446655440001', '19466a5c-80fa-4225-8536-28b2623f5b1b', 'uploads/chidi_assignment1_cs101.py', 18, 'Good work! Well structured code.', now() - interval '10 days'),
-  ('a50e8400-e29b-41d4-a716-446655440002', '950e8400-e29b-41d4-a716-446655440002', '19466a5c-80fa-4225-8536-28b2623f5b1b', 'uploads/chidi_assignment2_cs101.py', 19, 'Excellent! Clear and efficient functions.', now() - interval '5 days'),
+  ('a50e8400-e29b-41d4-a716-446655440001', '950e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440005', 'uploads/chidi_assignment1_cs101.py', 18, 'Good work! Well structured code.', now() - interval '10 days'),
+  ('a50e8400-e29b-41d4-a716-446655440002', '950e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440005', 'uploads/chidi_assignment2_cs101.py', 19, 'Excellent! Clear and efficient functions.', now() - interval '5 days'),
 
   -- Chidi's submissions for CS 301
-  ('a50e8400-e29b-41d4-a716-446655440003', '950e8400-e29b-41d4-a716-446655440003', '19466a5c-80fa-4225-8536-28b2623f5b1b', 'uploads/chidi_assignment1_cs301.pdf', 23, 'Very good ER diagram. Minor improvements needed.', now() - interval '8 days'),
-  ('a50e8400-e29b-41d4-a716-446655440004', '950e8400-e29b-41d4-a716-446655440004', '19466a5c-80fa-4225-8536-28b2623f5b1b', 'uploads/chidi_assignment2_cs301.sql', 22, 'Good queries. Optimize the JOIN operations.', now() - interval '3 days'),
+  ('a50e8400-e29b-41d4-a716-446655440003', '950e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440005', 'uploads/chidi_assignment1_cs301.pdf', 23, 'Very good ER diagram. Minor improvements needed.', now() - interval '8 days'),
+  ('a50e8400-e29b-41d4-a716-446655440004', '950e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440005', 'uploads/chidi_assignment2_cs301.sql', 22, 'Good queries. Optimize the JOIN operations.', now() - interval '3 days'),
 
   -- Amaka's submissions for CS 101
-  ('a50e8400-e29b-41d4-a716-446655440005', '950e8400-e29b-41d4-a716-446655440001', '855ed085-8117-477c-8591-7eac60094918', 'uploads/amaka_assignment1_cs101.py', 17, 'Good effort. Add more comments to your code.', now() - interval '9 days'),
-  ('a50e8400-e29b-41d4-a716-446655440006', '950e8400-e29b-41d4-a716-446655440002', '855ed085-8117-477c-8591-7eac60094918', 'uploads/amaka_assignment2_cs101.py', 16, 'Logic is correct but could be more efficient.', now() - interval '4 days'),
+  ('a50e8400-e29b-41d4-a716-446655440005', '950e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440006', 'uploads/amaka_assignment1_cs101.py', 17, 'Good effort. Add more comments to your code.', now() - interval '9 days'),
+  ('a50e8400-e29b-41d4-a716-446655440006', '950e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440006', 'uploads/amaka_assignment2_cs101.py', 16, 'Logic is correct but could be more efficient.', now() - interval '4 days'),
 
   -- Ikechukwu's submissions for CS 101
-  ('a50e8400-e29b-41d4-a716-446655440007', '950e8400-e29b-41d4-a716-446655440001', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', 'uploads/ikechukwu_assignment1_cs101.py', 20, 'Excellent submission! Very clean code.', now() - interval '11 days'),
-  ('a50e8400-e29b-41d4-a716-446655440008', '950e8400-e29b-41d4-a716-446655440002', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', 'uploads/ikechukwu_assignment2_cs101.py', NULL, NULL, now() - interval '1 day')
+  ('a50e8400-e29b-41d4-a716-446655440007', '950e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440007', 'uploads/ikechukwu_assignment1_cs101.py', 20, 'Excellent submission! Very clean code.', now() - interval '11 days'),
+  ('a50e8400-e29b-41d4-a716-446655440008', '950e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440007', 'uploads/ikechukwu_assignment2_cs101.py', NULL, NULL, now() - interval '1 day')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -180,23 +180,23 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.results (id, student_id, course_id, total_score, grade, published_at) VALUES
   -- Chidi's results
-  ('b50e8400-e29b-41d4-a716-446655440001', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440001', 92.5, 'A', now() - interval '2 days'),
-  ('b50e8400-e29b-41d4-a716-446655440002', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440002', 87.0, 'A', now() - interval '2 days'),
-  ('b50e8400-e29b-41d4-a716-446655440003', '19466a5c-80fa-4225-8536-28b2623f5b1b', '650e8400-e29b-41d4-a716-446655440004', 85.5, 'A', now() - interval '1 day'),
+  ('b50e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440001', 92.5, 'A', now() - interval '2 days'),
+  ('b50e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440002', 87.0, 'A', now() - interval '2 days'),
+  ('b50e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440005', '650e8400-e29b-41d4-a716-446655440004', 85.5, 'A', now() - interval '1 day'),
 
   -- Amaka's results
-  ('b50e8400-e29b-41d4-a716-446655440004', '855ed085-8117-477c-8591-7eac60094918', '650e8400-e29b-41d4-a716-446655440001', 78.5, 'B', now() - interval '2 days'),
-  ('b50e8400-e29b-41d4-a716-446655440005', '855ed085-8117-477c-8591-7eac60094918', '650e8400-e29b-41d4-a716-446655440002', 82.0, 'B', now() - interval '2 days'),
+  ('b50e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440006', '650e8400-e29b-41d4-a716-446655440001', 78.5, 'B', now() - interval '2 days'),
+  ('b50e8400-e29b-41d4-a716-446655440005', '550e8400-e29b-41d4-a716-446655440006', '650e8400-e29b-41d4-a716-446655440002', 82.0, 'B', now() - interval '2 days'),
 
   -- Ikechukwu's results
-  ('b50e8400-e29b-41d4-a716-446655440006', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', '650e8400-e29b-41d4-a716-446655440001', 95.0, 'A', now() - interval '2 days'),
-  ('b50e8400-e29b-41d4-a716-446655440007', 'a290b900-e259-4e6d-802b-ab000ebd8b6b', '650e8400-e29b-41d4-a716-446655440003', 88.5, 'A', now() - interval '2 days'),
+  ('b50e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440007', '650e8400-e29b-41d4-a716-446655440001', 95.0, 'A', now() - interval '2 days'),
+  ('b50e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440007', '650e8400-e29b-41d4-a716-446655440003', 88.5, 'A', now() - interval '2 days'),
 
   -- Blessing's results
-  ('b50e8400-e29b-41d4-a716-446655440008', '8391a5ff-4dba-42db-8a19-a861e50cf49a', '650e8400-e29b-41d4-a716-446655440002', 72.0, 'C', now() - interval '3 days'),
+  ('b50e8400-e29b-41d4-a716-446655440008', '550e8400-e29b-41d4-a716-446655440008', '650e8400-e29b-41d4-a716-446655440002', 72.0, 'C', now() - interval '3 days'),
 
   -- Zainab's results
-  ('b50e8400-e29b-41d4-a716-446655440009', 'a9c28497-7b1f-45f5-b7f2-49e96ffbe075', '650e8400-e29b-41d4-a716-446655440001', 89.5, 'A', now() - interval '2 days')
+  ('b50e8400-e29b-41d4-a716-446655440009', '550e8400-e29b-41d4-a716-446655440009', '650e8400-e29b-41d4-a716-446655440001', 89.5, 'A', now() - interval '2 days')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
@@ -293,15 +293,15 @@ ORDER BY c.course_code;
 -- ============================================================
 
 -- UUID Mapping used in this file:
--- 863e3a48-4e95-4fcd-8d90-b7297a85d9ea = Admin User
--- fccbbbc5-a125-45c9-934e-fcddd4186f9d = Dr. John Okafor (Lecturer)
--- 059f42de-9666-4df2-971c-789f2133da36 = Prof. Ada Eze (Lecturer)
--- 75381bc2-4451-48c5-b221-caea47a47d78 = Dr. Emeka Nnamdi (Lecturer)
--- 19466a5c-80fa-4225-8536-28b2623f5b1b = Chidi Nwosu (Student)
--- 855ed085-8117-477c-8591-7eac60094918 = Amaka Obiora (Student)
--- a290b900-e259-4e6d-802b-ab000ebd8b6b = Ikechukwu Obi (Student)
--- 8391a5ff-4dba-42db-8a19-a861e50cf49a = Blessing Okoro (Student)
--- a9c28497-7b1f-45f5-b7f2-49e96ffbe075 = Zainab Ibrahim (Student)
+-- 550e8400-e29b-41d4-a716-446655440001 = Admin User
+-- 550e8400-e29b-41d4-a716-446655440002 = Dr. John Okafor (Lecturer)
+-- 550e8400-e29b-41d4-a716-446655440003 = Prof. Ada Eze (Lecturer)
+-- 550e8400-e29b-41d4-a716-446655440004 = Dr. Emeka Nnamdi (Lecturer)
+-- 550e8400-e29b-41d4-a716-446655440005 = Chidi Nwosu (Student)
+-- 550e8400-e29b-41d4-a716-446655440006 = Amaka Obiora (Student)
+-- 550e8400-e29b-41d4-a716-446655440007 = Ikechukwu Obi (Student)
+-- 550e8400-e29b-41d4-a716-446655440008 = Blessing Okoro (Student)
+-- 550e8400-e29b-41d4-a716-446655440009 = Zainab Ibrahim (Student)
 
 -- IMPORTANT STEPS TO USE THIS FILE:
 -- 1. First register users via the application's /api/auth/register endpoint

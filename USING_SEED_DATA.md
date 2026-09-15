@@ -68,15 +68,15 @@ Open `SEED_DATA.sql` and replace all placeholder UUIDs:
 
 ```sql
 -- BEFORE (placeholder UUIDs)
-863e3a48-4e95-4fcd-8d90-b7297a85d9ea = Admin User
-fccbbbc5-a125-45c9-934e-fcddd4186f9d = Dr. John Okafor
-059f42de-9666-4df2-971c-789f2133da36 = Prof. Ada Eze
-75381bc2-4451-48c5-b221-caea47a47d78 = Dr. Emeka Nnamdi
-19466a5c-80fa-4225-8536-28b2623f5b1b = Chidi Nwosu
-855ed085-8117-477c-8591-7eac60094918 = Amaka Obiora
-a290b900-e259-4e6d-802b-ab000ebd8b6b = Ikechukwu Obi
-8391a5ff-4dba-42db-8a19-a861e50cf49a = Blessing Okoro
-a9c28497-7b1f-45f5-b7f2-49e96ffbe075 = Zainab Ibrahim
+550e8400-e29b-41d4-a716-446655440001 = Admin User
+550e8400-e29b-41d4-a716-446655440002 = Dr. John Okafor
+550e8400-e29b-41d4-a716-446655440003 = Prof. Ada Eze
+550e8400-e29b-41d4-a716-446655440004 = Dr. Emeka Nnamdi
+550e8400-e29b-41d4-a716-446655440005 = Chidi Nwosu
+550e8400-e29b-41d4-a716-446655440006 = Amaka Obiora
+550e8400-e29b-41d4-a716-446655440007 = Ikechukwu Obi
+550e8400-e29b-41d4-a716-446655440008 = Blessing Okoro
+550e8400-e29b-41d4-a716-446655440009 = Zainab Ibrahim
 
 -- AFTER (your actual UUIDs)
 YOUR-UUID-9 = Admin User
@@ -94,7 +94,7 @@ YOUR-UUID-8 = Zainab Ibrahim
 1. Open `SEED_DATA.sql`
 2. Press `Ctrl+H` (Find & Replace)
 3. Replace each UUID one by one:
-   - Find: `863e3a48-4e95-4fcd-8d90-b7297a85d9ea`
+   - Find: `550e8400-e29b-41d4-a716-446655440001`
    - Replace: Your Admin UUID
    - Click "Replace All"
 

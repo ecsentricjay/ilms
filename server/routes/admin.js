@@ -106,6 +106,74 @@ router.get('/enrolments', authenticate, requireRole('admin'), async (req, res) =
   } catch (err) { res.status(500).json({ error: 'Server error' }); }
 });
 
+// GET /api/admin/assignments — All assignments with submission counts
+router.get('/assignments', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('assignments')
+      .select('*, courses(course_title, course_code, semester)')
+      .order('due_date', { ascending: true });
+    if (error) return res.status(400).json({ error: error.message });
+
+    const enriched = await Promise.all((data || []).map(async (assignment) => {
+      const { data: submissions, error: submissionsError } = await supabase
+        .from('submissions')
+        .select('id, grade')
+        .eq('assignment_id', assignment.id);
+      if (submissionsError) return { ...assignment, submissionCount: 0, gradedCount: 0 };
+      return {
+        ...assignment,
+        submissionCount: submissions.length,
+        gradedCount: submissions.filter(submission => submission.grade !== null).length,
+      };
+    }));
+
+    res.json(enriched);
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// GET /api/admin/attendance — All attendance records
+router.get('/attendance', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('attendance')
+      .select('*, users!attendance_student_id_fkey(full_name, email), courses(course_title, course_code)')
+      .order('session_date', { ascending: false });
+    if (error) return res.status(400).json({ error: error.message });
+    res.json(data || []);
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// GET /api/admin/results — All results with CA calculated from assignment submissions
+router.get('/results', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { data: results, error } = await supabase
+      .from('results')
+      .select('*, users!results_student_id_fkey(full_name, email), courses(course_title, course_code, semester)')
+      .order('published_at', { ascending: false });
+    if (error) return res.status(400).json({ error: error.message });
+
+    const enriched = await Promise.all((results || []).map(async (result) => {
+      const { data: assignments } = await supabase
+        .from('assignments')
+        .select('id')
+        .eq('course_id', result.course_id);
+      const assignmentIds = (assignments || []).map(assignment => assignment.id);
+      const { data: submissions } = assignmentIds.length
+        ? await supabase.from('submissions').select('grade').eq('student_id', result.student_id).in('assignment_id', assignmentIds)
+        : { data: [] };
+      const graded = (submissions || []).filter(submission => submission.grade !== null);
+      const caScore = graded.length
+        ? graded.reduce((sum, submission) => sum + Number(submission.grade), 0) / graded.length
+        : null;
+
+      return { ...result, ca_score: caScore, exam_score: null };
+    }));
+
+    res.json(enriched);
+  } catch (err) { res.status(500).json({ error: 'Server error' }); }
+});
+
 // POST /api/admin/courses — Admin creates a course and assigns to a lecturer
 router.post('/courses', authenticate, requireRole('admin'), async (req, res) => {
   const { course_title, course_code, description, semester, lecturer_id } = req.body;

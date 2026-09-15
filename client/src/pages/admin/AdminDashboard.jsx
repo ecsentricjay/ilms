@@ -7,7 +7,7 @@ import Modal from '../../components/Modal';
 import EmptyState from '../../components/EmptyState';
 import Alert from '../../components/Alert';
 
-const TABS = ['Overview','Users','Courses','Enrolments'];
+const TABS = ['Overview','Users','Courses','Enrolments','Assignments','Attendance','Results','Grade / CGPA'];
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -16,6 +16,9 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [enrolments, setEnrolments] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [attendance, setAttendance] = useState([]);
+  const [results, setResults] = useState([]);
   const [students, setStudents] = useState([]);
   const [lecturers, setLecturers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,13 +48,16 @@ export default function AdminDashboard() {
 
   const fetchAll = async () => {
     try {
-      const [statsRes, usersRes, coursesRes, enrolRes, studRes, lectRes] = await Promise.all([
+      const [statsRes, usersRes, coursesRes, enrolRes, studRes, lectRes, assignmentsRes, attendanceRes, resultsRes] = await Promise.all([
         api.get('/api/admin/stats'),
         api.get('/api/admin/users'),
         api.get('/api/admin/courses'),
         api.get('/api/admin/enrolments'),
         api.get('/api/admin/students'),
         api.get('/api/admin/lecturers'),
+        api.get('/api/admin/assignments'),
+        api.get('/api/admin/attendance'),
+        api.get('/api/admin/results'),
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data);
@@ -59,6 +65,9 @@ export default function AdminDashboard() {
       setEnrolments(enrolRes.data);
       setStudents(studRes.data);
       setLecturers(lectRes.data);
+      setAssignments(assignmentsRes.data);
+      setAttendance(attendanceRes.data);
+      setResults(resultsRes.data);
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -208,6 +217,13 @@ export default function AdminDashboard() {
   });
 
   const roleColor = { student:'badge-blue', lecturer:'badge-purple', admin:'badge-amber' };
+  const gradePoints = { A: 5, B: 4, C: 3, D: 2, F: 0 };
+  const gradeGroups = results.reduce((groups, result) => {
+    const studentId = result.student_id;
+    if (!groups[studentId]) groups[studentId] = { student: result.users, results: [] };
+    groups[studentId].results.push(result);
+    return groups;
+  }, {});
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 rounded-full border-2 border-[#4f6ef7] border-t-transparent animate-spin" /></div>;
 
@@ -435,6 +451,93 @@ export default function AdminDashboard() {
               </table>
               {enrolments.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No enrolments yet</div>}
             </div>
+          </div>
+        )}
+
+        {/* ASSIGNMENTS */}
+        {tab === 'Assignments' && (
+          <div className="card overflow-hidden p-0">
+            <table className="data-table">
+              <thead><tr><th>Assignment</th><th>Course</th><th>Due</th><th>Max Score</th><th>Submissions</th><th>Graded</th></tr></thead>
+              <tbody>
+                {assignments.map(assignment => (
+                  <tr key={assignment.id}>
+                    <td className="font-semibold text-[#0f1117]">{assignment.title}</td>
+                    <td><p className="font-medium text-[#0f1117]">{assignment.courses?.course_title}</p><p className="text-xs text-[#9ca3af]">{assignment.courses?.course_code}</p></td>
+                    <td className="text-[#6b7280]">{new Date(assignment.due_date).toLocaleDateString()}</td>
+                    <td className="text-[#6b7280]">{assignment.max_score}</td>
+                    <td><span className="badge-blue">{assignment.submissionCount}</span></td>
+                    <td><span className="badge-green">{assignment.gradedCount}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {assignments.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No assignments yet</div>}
+          </div>
+        )}
+
+        {/* ATTENDANCE */}
+        {tab === 'Attendance' && (
+          <div className="card overflow-hidden p-0">
+            <table className="data-table">
+              <thead><tr><th>Student</th><th>Course</th><th>Session Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody>
+                {attendance.map(record => (
+                  <tr key={record.id}>
+                    <td><p className="font-semibold text-[#0f1117]">{record.users?.full_name}</p><p className="text-xs text-[#9ca3af]">{record.users?.email}</p></td>
+                    <td><p className="font-medium text-[#0f1117]">{record.courses?.course_title}</p><p className="text-xs text-[#9ca3af]">{record.courses?.course_code}</p></td>
+                    <td className="text-[#6b7280]">{new Date(record.session_date).toLocaleDateString()}</td>
+                    <td><span className={record.status === 'present' ? 'badge-green' : record.status === 'late' ? 'badge-amber' : 'badge-red'}>{record.status}</span></td>
+                    <td><button onClick={() => setEditModal({ type: 'attendance', data: record })} className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">Edit</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {attendance.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No attendance records yet</div>}
+          </div>
+        )}
+
+        {/* RESULTS */}
+        {tab === 'Results' && (
+          <div className="card overflow-hidden p-0">
+            <table className="data-table">
+              <thead><tr><th>Student</th><th>Course</th><th>CA</th><th>Exam</th><th>Total Score</th><th>Grade</th><th>Actions</th></tr></thead>
+              <tbody>
+                {results.map(result => (
+                  <tr key={result.id}>
+                    <td><p className="font-semibold text-[#0f1117]">{result.users?.full_name}</p><p className="text-xs text-[#9ca3af]">{result.users?.email}</p></td>
+                    <td><p className="font-medium text-[#0f1117]">{result.courses?.course_title}</p><p className="text-xs text-[#9ca3af]">{result.courses?.course_code}</p></td>
+                    <td className="text-[#6b7280]">{result.ca_score === null ? 'N/A' : result.ca_score.toFixed(2)}</td>
+                    <td className="text-[#9ca3af]">{result.exam_score === null ? 'Not recorded' : result.exam_score}</td>
+                    <td className="font-bold text-[#0f1117]">{result.total_score}</td>
+                    <td><span className={result.grade === 'F' ? 'badge-red' : 'badge-green'}>{result.grade}</span></td>
+                    <td><button onClick={() => setEditModal({ type: 'grade', data: result })} className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium">Edit</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {results.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No results yet</div>}
+          </div>
+        )}
+
+        {/* GRADES / CGPA */}
+        {tab === 'Grade / CGPA' && (
+          <div className="space-y-4">
+            {Object.entries(gradeGroups).map(([studentId, group]) => {
+              const cgpa = group.results.reduce((sum, result) => sum + (gradePoints[result.grade] ?? 0), 0) / group.results.length;
+              return (
+                <div key={studentId} className="card overflow-hidden p-0">
+                  <div className="flex justify-between items-center px-5 py-4 border-b border-[#e8eaf0]">
+                    <div><p className="font-semibold text-[#0f1117]">{group.student?.full_name}</p><p className="text-xs text-[#9ca3af]">{group.student?.email}</p></div>
+                    <div className="text-right"><p className="text-xs text-[#6b7280]">CGPA</p><p className="text-xl font-bold text-[#4f6ef7]">{cgpa.toFixed(2)} / 5.00</p></div>
+                  </div>
+                  <table className="data-table"><thead><tr><th>Course</th><th>Total Score</th><th>Grade</th><th>Grade Point</th></tr></thead><tbody>
+                    {group.results.map(result => <tr key={result.id}><td>{result.courses?.course_title} <span className="text-xs text-[#9ca3af]">({result.courses?.course_code})</span></td><td>{result.total_score}</td><td><span className="badge-blue">{result.grade}</span></td><td>{gradePoints[result.grade] ?? 0}</td></tr>)}
+                  </tbody></table>
+                </div>
+              );
+            })}
+            {Object.keys(gradeGroups).length === 0 && <div className="card text-center py-8 text-[#9ca3af] text-sm">No published grades yet</div>}
           </div>
         )}
       </div>
@@ -806,6 +909,7 @@ export default function AdminDashboard() {
           title={
             editModal.type === 'grade' ? 'Edit Student Grade' :
             editModal.type === 'submission' ? 'Edit Submission Grade' :
+            editModal.type === 'attendance' ? 'Edit Attendance' :
             editModal.type === 'courseStudent' ? `Edit: ${editModal.data.studentName}` :
             'Edit Data'
           }
@@ -828,6 +932,15 @@ export default function AdminDashboard() {
               onSave={(submissionId, grade, feedback) => {
                 handleUpdateGrade(submissionId, grade, feedback);
               }}
+              onCancel={() => setEditModal(null)}
+              saving={saving}
+            />
+          )}
+
+          {editModal.type === 'attendance' && (
+            <EditAttendanceForm
+              attendance={editModal.data}
+              onSave={handleUpdateAttendance}
               onCancel={() => setEditModal(null)}
               saving={saving}
             />
@@ -918,6 +1031,33 @@ function EditSubmissionForm({ submission, onSave, onCancel, saving }) {
       <div className="flex gap-3 justify-end">
         <button className="btn-secondary" onClick={onCancel}>Cancel</button>
         <button className="btn-primary" onClick={() => onSave(submission.id, grade, feedback)} disabled={saving}>
+          {saving ? 'Saving...' : 'Save'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EditAttendanceForm({ attendance, onSave, onCancel, saving }) {
+  const [status, setStatus] = useState(attendance.status);
+
+  return (
+    <div className="space-y-4">
+      <div className="text-sm text-[#6b7280]">
+        <p className="font-semibold text-[#0f1117]">{attendance.users?.full_name}</p>
+        <p>{attendance.courses?.course_title} · {new Date(attendance.session_date).toLocaleDateString()}</p>
+      </div>
+      <div>
+        <label className="label">Status</label>
+        <select className="input" value={status} onChange={e => setStatus(e.target.value)}>
+          <option value="present">Present</option>
+          <option value="late">Late</option>
+          <option value="absent">Absent</option>
+        </select>
+      </div>
+      <div className="flex gap-3 justify-end">
+        <button className="btn-secondary" onClick={onCancel}>Cancel</button>
+        <button className="btn-primary" onClick={() => onSave(attendance.id, status)} disabled={saving}>
           {saving ? 'Saving...' : 'Save'}
         </button>
       </div>
