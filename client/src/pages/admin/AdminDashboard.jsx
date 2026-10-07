@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/Navbar';
@@ -35,6 +35,7 @@ export default function AdminDashboard() {
   const [createLecturerModal, setCreateLecturerModal] = useState(false);
   const [detailModal, setDetailModal] = useState(null); // { type: 'student'|'lecturer'|'course', data, details }
   const [editModal, setEditModal] = useState(null); // For editing individual data
+  const [printPreviewModal, setPrintPreviewModal] = useState(null); // { html: string, userName: string }
 
   // Form states
   const [enrolForm, setEnrolForm] = useState({ student_id: '', course_id: '' });
@@ -374,15 +375,7 @@ export default function AdminDashboard() {
       </html>
     `;
 
-    const printWin = window.open('', '_blank', 'width=900,height=700');
-    if (!printWin) {
-      setError('Popup blocked. Please allow popups and try again.');
-      return;
-    }
-    printWin.document.write(htmlContent);
-    printWin.document.close();
-    printWin.focus();
-    setTimeout(() => { printWin.print(); }, 400);
+    setPrintPreviewModal({ html: htmlContent, userName: u.full_name });
   };
 
   const filteredUsers = users.filter(u => {
@@ -1137,6 +1130,15 @@ export default function AdminDashboard() {
           )}
         </Modal>
       )}
+
+      {/* Print Preview Modal */}
+      {printPreviewModal && (
+        <PrintPreviewModal
+          html={printPreviewModal.html}
+          userName={printPreviewModal.userName}
+          onClose={() => setPrintPreviewModal(null)}
+        />
+      )}
     </div>
   );
 }
@@ -1337,6 +1339,103 @@ function EditCourseStudentForm({ student, onCancel, saving }) {
         <button className="btn-secondary" onClick={onCancel}>Cancel</button>
         <button className="btn-primary" onClick={handleSaveGrade} disabled={saving}>
           {saving ? 'Saving...' : 'Save Grade'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Print Preview Modal Component
+function PrintPreviewModal({ html, userName, onClose }) {
+  const iframeRef = useRef(null);
+
+  const handlePrint = () => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  };
+
+  // Write HTML into iframe once it mounts
+  const handleIframeLoad = (e) => {
+    const doc = e.target.contentDocument || e.target.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+  };
+
+  // Close on backdrop click
+  const handleBackdrop = (e) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex flex-col"
+      style={{ background: 'rgba(15,17,23,0.75)', backdropFilter: 'blur(4px)' }}
+      onClick={handleBackdrop}
+    >
+      {/* Top bar */}
+      <div
+        className="flex items-center justify-between px-6 py-3 shrink-0"
+        style={{ background: '#0f1117', borderBottom: '1px solid #1e2130' }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-white font-semibold text-sm">Print Preview</span>
+          <span className="text-[#6b7280] text-xs">— {userName}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-[#9ca3af] text-xs hidden sm:block">
+            Review the report below, then click Send to Printer
+          </span>
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#4f6ef7] text-white text-sm font-semibold hover:bg-[#3b5bdb] transition-colors shadow"
+          >
+            🖨️ Send to Printer
+          </button>
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#1e2130] text-[#9ca3af] text-sm hover:bg-[#2a2f45] hover:text-white transition-colors"
+          >
+            ✕ Close
+          </button>
+        </div>
+      </div>
+
+      {/* Preview area */}
+      <div className="flex-1 overflow-auto flex justify-center py-8 px-4">
+        <div
+          className="w-full rounded-2xl overflow-hidden shadow-2xl"
+          style={{ maxWidth: 860, background: 'white' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <iframe
+            ref={iframeRef}
+            title="Print Preview"
+            onLoad={handleIframeLoad}
+            style={{ width: '100%', minHeight: 900, border: 'none', display: 'block' }}
+          />
+        </div>
+      </div>
+
+      {/* Bottom action bar */}
+      <div
+        className="flex justify-center gap-4 px-6 py-4 shrink-0"
+        style={{ background: '#0f1117', borderTop: '1px solid #1e2130' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="px-5 py-2 rounded-xl bg-[#1e2130] text-[#9ca3af] text-sm font-medium hover:bg-[#2a2f45] hover:text-white transition-colors"
+        >
+          ✕ Close Preview
+        </button>
+        <button
+          onClick={handlePrint}
+          className="flex items-center gap-2 px-6 py-2 rounded-xl bg-[#4f6ef7] text-white text-sm font-semibold hover:bg-[#3b5bdb] transition-colors shadow"
+        >
+          🖨️ Send to Printer
         </button>
       </div>
     </div>
