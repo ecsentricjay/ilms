@@ -1349,19 +1349,23 @@ function EditCourseStudentForm({ student, onCancel, saving }) {
 function PrintPreviewModal({ html, userName, onClose }) {
   const iframeRef = useRef(null);
 
+  // Write HTML into the iframe exactly once after it mounts.
+  // Using useEffect avoids the double-fire issue with the onLoad event,
+  // which would clear the content on the second call.
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+  }, [html]);
+
   const handlePrint = () => {
     const iframe = iframeRef.current;
     if (!iframe) return;
     iframe.contentWindow.focus();
     iframe.contentWindow.print();
-  };
-
-  // Write HTML into iframe once it mounts
-  const handleIframeLoad = (e) => {
-    const doc = e.target.contentDocument || e.target.contentWindow.document;
-    doc.open();
-    doc.write(html);
-    doc.close();
   };
 
   // Close on backdrop click
@@ -1413,7 +1417,6 @@ function PrintPreviewModal({ html, userName, onClose }) {
           <iframe
             ref={iframeRef}
             title="Print Preview"
-            onLoad={handleIframeLoad}
             style={{ width: '100%', minHeight: 900, border: 'none', display: 'block' }}
           />
         </div>
