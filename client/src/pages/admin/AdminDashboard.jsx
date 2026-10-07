@@ -210,6 +210,181 @@ export default function AdminDashboard() {
     }
   };
 
+  const handlePrintUser = async (u) => {
+    let detailData = null;
+    try {
+      if (u.role === 'student') {
+        const res = await api.get(`/api/admin/student/${u.id}/detailed`);
+        detailData = res.data;
+      } else if (u.role === 'lecturer') {
+        const res = await api.get(`/api/admin/lecturer/${u.id}/detailed`);
+        detailData = res.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    const gradePointsMap = { A: 5, B: 4, C: 3, D: 2, F: 0 };
+    const printDate = new Date().toLocaleString();
+
+    let bodyHtml = '';
+
+    if (u.role === 'student' && detailData) {
+      const s = detailData.summary || {};
+      const perf = detailData.coursePerformance || [];
+      const resultsCourses = perf.filter(cp => cp.result);
+      const cgpa = resultsCourses.length > 0
+        ? (resultsCourses.reduce((sum, cp) => sum + (gradePointsMap[cp.result.grade] ?? 0), 0) / resultsCourses.length).toFixed(2)
+        : 'N/A';
+
+      bodyHtml = `
+        <section class="summary-grid">
+          <div class="stat-box"><div class="stat-val">${s.enrolledCourses ?? 0}</div><div class="stat-lbl">Enrolled Courses</div></div>
+          <div class="stat-box"><div class="stat-val">${s.totalSubmissions ?? 0}</div><div class="stat-lbl">Submissions</div></div>
+          <div class="stat-box"><div class="stat-val">${s.overallAverageGrade?.toFixed(2) ?? 'N/A'}</div><div class="stat-lbl">Avg Grade</div></div>
+          <div class="stat-box"><div class="stat-val">${s.coursesWithResults ?? 0}</div><div class="stat-lbl">Results</div></div>
+          <div class="stat-box"><div class="stat-val">${cgpa}</div><div class="stat-lbl">CGPA (5.0)</div></div>
+        </section>
+        <h3>Course Performance</h3>
+        ${perf.length === 0 ? '<p style="color:#888;">No courses enrolled.</p>' : perf.map(cp => `
+          <div class="course-card">
+            <div class="course-header">
+              <strong>${cp.courseTitle}</strong>
+              <span class="tag">${cp.courseCode} &bull; ${cp.semester}</span>
+            </div>
+            <p style="margin:4px 0 8px;font-size:12px;color:#555;">Lecturer: ${cp.lecturer?.full_name ?? 'N/A'}</p>
+            <div class="metric-row">
+              <div class="metric-box"><div class="metric-val">${cp.submissionSummary?.total ?? 0}</div><div class="metric-lbl">Submissions</div></div>
+              <div class="metric-box"><div class="metric-val">${cp.submissionSummary?.graded ?? 0}</div><div class="metric-lbl">Graded</div></div>
+              <div class="metric-box"><div class="metric-val">${cp.submissionSummary?.averageGrade?.toFixed(1) ?? 'N/A'}</div><div class="metric-lbl">Avg Grade</div></div>
+              <div class="metric-box"><div class="metric-val">${cp.attendance?.attendanceRate ?? 0}%</div><div class="metric-lbl">Attendance (${cp.attendance?.present ?? 0}/${cp.attendance?.total ?? 0})</div></div>
+            </div>
+            ${cp.result ? `
+              <div class="result-row">
+                <span>Final Result &mdash; Total Score: <strong>${cp.result.total_score}</strong></span>
+                <span class="grade-badge">${cp.result.grade}</span>
+              </div>` : '<p style="font-size:12px;color:#888;margin:6px 0 0;">No final result recorded.</p>'}
+            ${cp.submissions?.length > 0 ? `
+              <table class="sub-table">
+                <thead><tr><th>Assignment</th><th>Grade</th><th>Max Score</th></tr></thead>
+                <tbody>${cp.submissions.map(sub => `
+                  <tr>
+                    <td>${sub.assignments?.title ?? 'N/A'}</td>
+                    <td>${sub.grade !== null ? sub.grade : 'Pending'}</td>
+                    <td>${sub.assignments?.max_score ?? 'N/A'}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>` : ''}
+          </div>`).join('')}
+      `;
+    } else if (u.role === 'lecturer' && detailData) {
+      const s = detailData.summary || {};
+      const courses = detailData.courses || [];
+      bodyHtml = `
+        <section class="summary-grid">
+          <div class="stat-box"><div class="stat-val">${s.totalCourses ?? 0}</div><div class="stat-lbl">Courses</div></div>
+          <div class="stat-box"><div class="stat-val">${s.totalStudents ?? 0}</div><div class="stat-lbl">Students</div></div>
+          <div class="stat-box"><div class="stat-val">${s.totalAssignments ?? 0}</div><div class="stat-lbl">Assignments</div></div>
+          <div class="stat-box"><div class="stat-val">${s.totalSubmissions ?? 0}</div><div class="stat-lbl">Submissions</div></div>
+        </section>
+        <h3>Assigned Courses</h3>
+        ${courses.length === 0 ? '<p style="color:#888;">No courses assigned.</p>' : courses.map(c => `
+          <div class="course-card">
+            <div class="course-header">
+              <strong>${c.course_title}</strong>
+              <span class="tag">${c.course_code} &bull; ${c.semester}</span>
+            </div>
+            <div class="metric-row">
+              <div class="metric-box"><div class="metric-val">${c.studentCount ?? 0}</div><div class="metric-lbl">Students</div></div>
+              <div class="metric-box"><div class="metric-val">${c.materialCount ?? 0}</div><div class="metric-lbl">Materials</div></div>
+              <div class="metric-box"><div class="metric-val">${c.assignmentCount ?? 0}</div><div class="metric-lbl">Assignments</div></div>
+              <div class="metric-box"><div class="metric-val">${c.totalSubmissions ?? 0}</div><div class="metric-lbl">Submissions</div></div>
+            </div>
+          </div>`).join('')}
+      `;
+    } else {
+      bodyHtml = '<p style="color:#888;margin-top:16px;">No extended data available for this account type.</p>';
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>User Report – ${u.full_name}</title>
+        <style>
+          *, *::before, *::after { box-sizing: border-box; }
+          body { font-family: 'Segoe UI', Arial, sans-serif; color: #0f1117; margin: 0; padding: 32px; font-size: 13px; }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4f6ef7; padding-bottom: 16px; margin-bottom: 24px; }
+          .header h1 { margin: 0 0 4px; font-size: 20px; color: #4f6ef7; }
+          .header p { margin: 2px 0; color: #6b7280; font-size: 12px; }
+          .meta-pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-right: 6px; }
+          .role-student { background: #dbeafe; color: #1d4ed8; }
+          .role-lecturer { background: #ede9fe; color: #7c3aed; }
+          .role-admin { background: #fef3c7; color: #b45309; }
+          .status-active { background: #d1fae5; color: #065f46; }
+          .status-inactive { background: #fee2e2; color: #b91c1c; }
+          .logo-area { text-align: right; font-size: 11px; color: #9ca3af; }
+          h3 { margin: 20px 0 10px; font-size: 14px; color: #4f6ef7; border-bottom: 1px solid #e8eaf0; padding-bottom: 4px; }
+          .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+          .stat-box { background: #f8f9fc; border-radius: 10px; padding: 12px; text-align: center; }
+          .stat-val { font-size: 20px; font-weight: 700; color: #0f1117; }
+          .stat-lbl { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+          .course-card { border: 1px solid #e8eaf0; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+          .course-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+          .tag { font-size: 11px; color: #6b7280; background: #eef1fe; padding: 2px 8px; border-radius: 20px; }
+          .metric-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+          .metric-box { background: #f8f9fc; border-radius: 8px; padding: 8px; text-align: center; }
+          .metric-val { font-weight: 700; font-size: 14px; color: #0f1117; }
+          .metric-lbl { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+          .result-row { display: flex; justify-content: space-between; align-items: center; background: #d1fae5; border-radius: 8px; padding: 8px 12px; margin-top: 10px; font-size: 12px; }
+          .grade-badge { font-weight: 700; font-size: 16px; color: #065f46; }
+          .sub-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+          .sub-table th { text-align: left; border-bottom: 1px solid #e8eaf0; padding: 4px 8px; color: #6b7280; font-weight: 600; }
+          .sub-table td { padding: 4px 8px; border-bottom: 1px solid #f3f4f6; }
+          .sub-table tr:last-child td { border-bottom: none; }
+          .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e8eaf0; font-size: 11px; color: #9ca3af; text-align: center; }
+          @media print { body { padding: 16px; } }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <h1>${u.full_name}</h1>
+            <p>${u.email}</p>
+            <div style="margin-top:8px;">
+              <span class="meta-pill role-${u.role}">${u.role.charAt(0).toUpperCase() + u.role.slice(1)}</span>
+              <span class="meta-pill ${u.is_active ? 'status-active' : 'status-inactive'}">${u.is_active ? 'Active' : 'Inactive'}</span>
+            </div>
+            <p style="margin-top:8px;font-size:12px;color:#6b7280;">Joined: ${new Date(u.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          </div>
+          <div class="logo-area">
+            <strong style="font-size:15px;color:#4f6ef7;">ILMS</strong><br/>
+            Integrated Learning<br/>Management System<br/>
+            <span style="font-size:10px;">Printed: ${printDate}</span>
+          </div>
+        </div>
+
+        ${bodyHtml}
+
+        <div class="footer">
+          This report was generated by the ILMS Admin Dashboard &mdash; ${printDate}
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWin = window.open('', '_blank', 'width=900,height=700');
+    if (!printWin) {
+      setError('Popup blocked. Please allow popups and try again.');
+      return;
+    }
+    printWin.document.write(htmlContent);
+    printWin.document.close();
+    printWin.focus();
+    setTimeout(() => { printWin.print(); }, 400);
+  };
+
   const filteredUsers = users.filter(u => {
     const matchSearch = u.full_name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
     const matchRole = roleFilter === 'all' || u.role === roleFilter;
@@ -353,13 +528,20 @@ export default function AdminDashboard() {
                       </td>
                       <td className="text-[#9ca3af]">{new Date(u.created_at).toLocaleDateString()}</td>
                       <td>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           {(u.role === 'student' || u.role === 'lecturer') && (
                             <button onClick={() => openDetail(u.role, u.id)}
                               className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
                               View Data
                             </button>
                           )}
+                          <button
+                            onClick={() => handlePrintUser(u)}
+                            className="text-xs px-2.5 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium flex items-center gap-1"
+                            title="Print user report"
+                          >
+                            🖨️ Print
+                          </button>
                           {u.id !== user?.id && (
                             <button onClick={() => toggleStatus(u.id, u.is_active)}
                               className={`text-xs px-2.5 py-1 rounded-lg font-medium ${
