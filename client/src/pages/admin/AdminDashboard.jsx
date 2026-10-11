@@ -7,11 +7,9 @@ import Modal from '../../components/Modal';
 import EmptyState from '../../components/EmptyState';
 import Alert from '../../components/Alert';
 
-const TABS = ['Overview','Users','Courses','Enrolments','Assignments','Attendance','Results','Grade / CGPA'];
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [tab, setTab] = useState('Overview');
   const [stats, setStats] = useState({});
   const [users, setUsers] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -408,229 +406,210 @@ export default function AdminDashboard() {
         {success && <Alert type="success" message={success} />}
         {error && <Alert type="error" message={error} />}
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-white border border-[#e8eaf0] p-1 rounded-2xl mb-6 w-fit shadow-sm flex-wrap">
-          {TABS.map(t => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`px-5 py-2 rounded-xl text-sm font-medium transition-all ${
-                tab === t ? 'bg-[#4f6ef7] text-white shadow-sm' : 'text-[#6b7280] hover:text-[#0f1117]'
-              }`}>{t}</button>
-          ))}
-        </div>
+        {/* ── OVERVIEW ── */}
+        <section className="space-y-6 mb-10">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-xl">📊</span>
+            <h2 className="text-lg font-bold text-[#0f1117]">Overview</h2>
+          </div>
 
-        {/* OVERVIEW */}
-        {tab === 'Overview' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { icon:'👥', label:'Total Users', value: stats.totalUsers, color:'blue' },
+              { icon:'🎓', label:'Students', value: stats.totalStudents, color:'purple' },
+              { icon:'🏫', label:'Lecturers', value: stats.totalLecturers, color:'indigo' },
+              { icon:'📚', label:'Courses', value: stats.totalCourses, color:'green' },
+              { icon:'📋', label:'Enrolments', value: stats.totalEnrolments, color:'amber' },
+              { icon:'📝', label:'Submissions', value: stats.totalSubmissions, color:'red' },
+            ].map((s,i) => <div key={s.label} className={`fade-up-${Math.min(i+1,4)}`}><StatCard {...s} /></div>)}
+          </div>
+
+          {/* Quick Actions */}
+          <div>
+            <h3 className="font-semibold text-[#0f1117] mb-3">Quick Actions</h3>
+            <div className="grid sm:grid-cols-3 gap-3">
               {[
-                { icon:'👥', label:'Total Users', value: stats.totalUsers, color:'blue' },
-                { icon:'🎓', label:'Students', value: stats.totalStudents, color:'purple' },
-                { icon:'🏫', label:'Lecturers', value: stats.totalLecturers, color:'indigo' },
-                { icon:'📚', label:'Courses', value: stats.totalCourses, color:'green' },
-                { icon:'📋', label:'Enrolments', value: stats.totalEnrolments, color:'amber' },
-                { icon:'📝', label:'Submissions', value: stats.totalSubmissions, color:'red' },
-              ].map((s,i) => <div key={s.label} className={`fade-up-${Math.min(i+1,4)}`}><StatCard {...s} /></div>)}
+                { icon:'➕', label:'Create Course', sub:'Assign to a lecturer', action:() => setCourseModal(true), color:'bg-[#eef1fe] text-[#4f6ef7]' },
+                { icon:'👨‍🏫', label:'Create Lecturer', sub:'Add new lecturer account', action:() => setCreateLecturerModal(true), color:'bg-purple-50 text-purple-700' },
+                { icon:'🔗', label:'Enrol Student', sub:'Add student to a course', action:() => setEnrolModal(true), color:'bg-green-50 text-green-700' },
+              ].map(item => (
+                <button key={item.label} onClick={item.action} className="card hover:shadow-md transition-all text-left p-5 hover:-translate-y-0.5 duration-200">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 ${item.color}`}>{item.icon}</div>
+                  <p className="font-semibold text-[#0f1117] text-sm">{item.label}</p>
+                  <p className="text-xs text-[#9ca3af] mt-0.5">{item.sub}</p>
+                </button>
+              ))}
             </div>
+          </div>
+        </section>
 
-            {/* Quick links */}
-            <div>
-              <h2 className="font-semibold text-[#0f1117] mb-3">Quick Actions</h2>
-              <div className="grid sm:grid-cols-4 gap-3">
-                {[
-                  { icon:'➕', label:'Create Course', sub:'Assign to a lecturer', action:() => setCourseModal(true), color:'bg-[#eef1fe] text-[#4f6ef7]' },
-                  { icon:'👨‍🏫', label:'Create Lecturer', sub:'Add new lecturer account', action:() => setCreateLecturerModal(true), color:'bg-purple-50 text-purple-700' },
-                  { icon:'🔗', label:'Enrol Student', sub:'Add student to a course', action:() => setEnrolModal(true), color:'bg-green-50 text-green-700' },
-                  { icon:'👥', label:'Manage Users', sub:'View all accounts', action:() => setTab('Users'), color:'bg-amber-50 text-amber-700' },
-                ].map(item => (
-                  <button key={item.label} onClick={item.action} className="card hover:shadow-md transition-all text-left p-5 hover:-translate-y-0.5 duration-200">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3 ${item.color}`}>{item.icon}</div>
-                    <p className="font-semibold text-[#0f1117] text-sm">{item.label}</p>
-                    <p className="text-xs text-[#9ca3af] mt-0.5">{item.sub}</p>
-                  </button>
+        <hr className="border-[#e8eaf0] mb-10" />
+
+        {/* ── USERS ── */}
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xl">👥</span>
+            <h2 className="text-lg font-bold text-[#0f1117]">Users</h2>
+            <span className="text-sm text-[#9ca3af] font-normal">({users.length} total)</span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <input className="input max-w-xs" placeholder="Search name or email…" value={search} onChange={e => setSearch(e.target.value)} />
+            <select className="input w-auto" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+              <option value="all">All roles</option>
+              <option value="student">Students</option>
+              <option value="lecturer">Lecturers</option>
+              <option value="admin">Admins</option>
+            </select>
+          </div>
+          <div className="card overflow-hidden p-0">
+            <table className="data-table">
+              <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+              <tbody>
+                {filteredUsers.map(u => (
+                  <tr key={u.id}>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[#eef1fe] flex items-center justify-center text-[#4f6ef7] font-bold text-xs shrink-0">
+                          {u.full_name?.[0]}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-[#0f1117]">{u.full_name}</p>
+                          <p className="text-xs text-[#9ca3af]">{u.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span className={roleColor[u.role]}>{u.role}</span></td>
+                    <td>
+                      <span className={`badge ${u.is_active ? 'badge-green' : 'badge-red'}`}>
+                        {u.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="text-[#9ca3af]">{new Date(u.created_at).toLocaleDateString()}</td>
+                    <td>
+                      <div className="flex gap-2 flex-wrap">
+                        {(u.role === 'student' || u.role === 'lecturer') && (
+                          <button onClick={() => openDetail(u.role, u.id)}
+                            className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
+                            View Data
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handlePrintUser(u)}
+                          className="text-xs px-2.5 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium flex items-center gap-1"
+                          title="Print user report"
+                        >
+                          🖨️ Print
+                        </button>
+                        {u.id !== user?.id && (
+                          <button onClick={() => toggleStatus(u.id, u.is_active)}
+                            className={`text-xs px-2.5 py-1 rounded-lg font-medium ${
+                              u.is_active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100'
+                            }`}>
+                            {u.is_active ? 'Deactivate' : 'Reactivate'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            </div>
-
-            {/* Recent courses */}
-            <div>
-              <h2 className="font-semibold text-[#0f1117] mb-3">Recent Courses</h2>
-              <div className="card overflow-hidden p-0">
-                <table className="data-table">
-                  <thead><tr><th>Course</th><th>Lecturer</th><th>Students</th><th>Materials</th><th>Assignments</th><th>Actions</th></tr></thead>
-                  <tbody>
-                    {courses.slice(0,5).map(c => (
-                      <tr key={c.id}>
-                        <td>
-                          <p className="font-semibold text-[#0f1117]">{c.course_title}</p>
-                          <p className="text-xs text-[#9ca3af]">{c.course_code} · {c.semester}</p>
-                        </td>
-                        <td className="text-[#6b7280]">{c.users?.full_name}</td>
-                        <td><span className="badge-blue">{c.studentCount ?? 0}</span></td>
-                        <td className="text-[#6b7280]">{c.materialCount ?? 0}</td>
-                        <td className="text-[#6b7280]">{c.assignmentCount ?? 0}</td>
-                        <td>
-                          <button onClick={() => openDetail('course', c.id)}
-                            className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
-                            View All
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {courses.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No courses yet</div>}
-              </div>
-            </div>
+              </tbody>
+            </table>
+            {filteredUsers.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No users found</div>}
           </div>
-        )}
+        </section>
 
-        {/* USERS */}
-        {tab === 'Users' && (
-          <div>
-            <div className="flex flex-col sm:flex-row gap-3 mb-4">
-              <input className="input max-w-xs" placeholder="Search name or email…" value={search} onChange={e => setSearch(e.target.value)} />
-              <select className="input w-auto" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
-                <option value="all">All roles</option>
-                <option value="student">Students</option>
-                <option value="lecturer">Lecturers</option>
-                <option value="admin">Admins</option>
-              </select>
+        <hr className="border-[#e8eaf0] mb-10" />
+
+        {/* ── COURSES ── */}
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📚</span>
+              <h2 className="text-lg font-bold text-[#0f1117]">Courses</h2>
+              <span className="text-sm text-[#9ca3af] font-normal">({courses.length} total)</span>
             </div>
-            <div className="card overflow-hidden p-0">
-              <table className="data-table">
-                <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
-                <tbody>
-                  {filteredUsers.map(u => (
-                    <tr key={u.id}>
-                      <td>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-[#eef1fe] flex items-center justify-center text-[#4f6ef7] font-bold text-xs shrink-0">
-                            {u.full_name?.[0]}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-[#0f1117]">{u.full_name}</p>
-                            <p className="text-xs text-[#9ca3af]">{u.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td><span className={roleColor[u.role]}>{u.role}</span></td>
-                      <td>
-                        <span className={`badge ${u.is_active ? 'badge-green' : 'badge-red'}`}>
-                          {u.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="text-[#9ca3af]">{new Date(u.created_at).toLocaleDateString()}</td>
-                      <td>
-                        <div className="flex gap-2 flex-wrap">
-                          {(u.role === 'student' || u.role === 'lecturer') && (
-                            <button onClick={() => openDetail(u.role, u.id)}
-                              className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
-                              View Data
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handlePrintUser(u)}
-                            className="text-xs px-2.5 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium flex items-center gap-1"
-                            title="Print user report"
-                          >
-                            🖨️ Print
-                          </button>
-                          {u.id !== user?.id && (
-                            <button onClick={() => toggleStatus(u.id, u.is_active)}
-                              className={`text-xs px-2.5 py-1 rounded-lg font-medium ${
-                                u.is_active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100'
-                              }`}>
-                              {u.is_active ? 'Deactivate' : 'Reactivate'}
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {filteredUsers.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No users found</div>}
-            </div>
+            <button className="btn-primary text-sm" onClick={() => setCourseModal(true)}>+ Create Course</button>
           </div>
-        )}
-
-        {/* COURSES */}
-        {tab === 'Courses' && (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-[#0f1117]">{courses.length} course{courses.length !== 1 ? 's' : ''}</h2>
-              <button className="btn-primary text-sm" onClick={() => setCourseModal(true)}>+ Create Course</button>
-            </div>
-            <div className="card overflow-hidden p-0">
-              <table className="data-table">
-                <thead><tr><th>Course</th><th>Lecturer</th><th>Semester</th><th>Students</th><th>Actions</th></tr></thead>
-                <tbody>
-                  {courses.map(c => (
-                    <tr key={c.id}>
-                      <td>
-                        <p className="font-semibold text-[#0f1117]">{c.course_title}</p>
-                        <p className="text-xs text-[#9ca3af]">{c.course_code}</p>
-                      </td>
-                      <td>
-                        <p className="text-sm text-[#0f1117]">{c.users?.full_name}</p>
-                        <p className="text-xs text-[#9ca3af]">{c.users?.email}</p>
-                      </td>
-                      <td className="text-[#6b7280] text-sm">{c.semester}</td>
-                      <td><span className="badge-blue">{c.studentCount ?? 0}</span></td>
-                      <td>
-                        <div className="flex gap-2">
-                          <button onClick={() => openDetail('course', c.id)}
-                            className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
-                            View Students
-                          </button>
-                          <button onClick={() => { setReassignModal(c); setReassignLecturer(c.lecturer_id); }}
-                            className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium">
-                            Reassign
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {courses.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No courses yet</div>}
-            </div>
+          <div className="card overflow-hidden p-0">
+            <table className="data-table">
+              <thead><tr><th>Course</th><th>Lecturer</th><th>Semester</th><th>Students</th><th>Actions</th></tr></thead>
+              <tbody>
+                {courses.map(c => (
+                  <tr key={c.id}>
+                    <td>
+                      <p className="font-semibold text-[#0f1117]">{c.course_title}</p>
+                      <p className="text-xs text-[#9ca3af]">{c.course_code}</p>
+                    </td>
+                    <td>
+                      <p className="text-sm text-[#0f1117]">{c.users?.full_name}</p>
+                      <p className="text-xs text-[#9ca3af]">{c.users?.email}</p>
+                    </td>
+                    <td className="text-[#6b7280] text-sm">{c.semester}</td>
+                    <td><span className="badge-blue">{c.studentCount ?? 0}</span></td>
+                    <td>
+                      <div className="flex gap-2">
+                        <button onClick={() => openDetail('course', c.id)}
+                          className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
+                          View Students
+                        </button>
+                        <button onClick={() => { setReassignModal(c); setReassignLecturer(c.lecturer_id); }}
+                          className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium">
+                          Reassign
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {courses.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No courses yet</div>}
           </div>
-        )}
+        </section>
 
-        {/* ENROLMENTS */}
-        {tab === 'Enrolments' && (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-[#0f1117]">{enrolments.length} enrolment{enrolments.length !== 1 ? 's' : ''}</h2>
-              <button className="btn-primary text-sm" onClick={() => setEnrolModal(true)}>+ Enrol Student</button>
+        <hr className="border-[#e8eaf0] mb-10" />
+
+        {/* ── ENROLMENTS ── */}
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">🔗</span>
+              <h2 className="text-lg font-bold text-[#0f1117]">Enrolments</h2>
+              <span className="text-sm text-[#9ca3af] font-normal">({enrolments.length} total)</span>
             </div>
-            <div className="card overflow-hidden p-0">
-              <table className="data-table">
-                <thead><tr><th>Student</th><th>Course</th><th>Enrolled</th></tr></thead>
-                <tbody>
-                  {enrolments.map(e => (
-                    <tr key={e.id}>
-                      <td>
-                        <p className="font-semibold text-[#0f1117]">{e.users?.full_name}</p>
-                        <p className="text-xs text-[#9ca3af]">{e.users?.email}</p>
-                      </td>
-                      <td>
-                        <p className="font-medium text-[#0f1117]">{e.courses?.course_title}</p>
-                        <p className="text-xs text-[#9ca3af]">{e.courses?.course_code}</p>
-                      </td>
-                      <td className="text-[#9ca3af]">{new Date(e.enrolled_at).toLocaleDateString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {enrolments.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No enrolments yet</div>}
-            </div>
+            <button className="btn-primary text-sm" onClick={() => setEnrolModal(true)}>+ Enrol Student</button>
           </div>
-        )}
+          <div className="card overflow-hidden p-0">
+            <table className="data-table">
+              <thead><tr><th>Student</th><th>Course</th><th>Enrolled</th></tr></thead>
+              <tbody>
+                {enrolments.map(e => (
+                  <tr key={e.id}>
+                    <td>
+                      <p className="font-semibold text-[#0f1117]">{e.users?.full_name}</p>
+                      <p className="text-xs text-[#9ca3af]">{e.users?.email}</p>
+                    </td>
+                    <td>
+                      <p className="font-medium text-[#0f1117]">{e.courses?.course_title}</p>
+                      <p className="text-xs text-[#9ca3af]">{e.courses?.course_code}</p>
+                    </td>
+                    <td className="text-[#9ca3af]">{new Date(e.enrolled_at).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {enrolments.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No enrolments yet</div>}
+          </div>
+        </section>
 
-        {/* ASSIGNMENTS */}
-        {tab === 'Assignments' && (
+        <hr className="border-[#e8eaf0] mb-10" />
+
+        {/* ── ASSIGNMENTS ── */}
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xl">📝</span>
+            <h2 className="text-lg font-bold text-[#0f1117]">Assignments</h2>
+            <span className="text-sm text-[#9ca3af] font-normal">({assignments.length} total)</span>
+          </div>
           <div className="card overflow-hidden p-0">
             <table className="data-table">
               <thead><tr><th>Assignment</th><th>Course</th><th>Due</th><th>Max Score</th><th>Submissions</th><th>Graded</th></tr></thead>
@@ -649,10 +628,17 @@ export default function AdminDashboard() {
             </table>
             {assignments.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No assignments yet</div>}
           </div>
-        )}
+        </section>
 
-        {/* ATTENDANCE */}
-        {tab === 'Attendance' && (
+        <hr className="border-[#e8eaf0] mb-10" />
+
+        {/* ── ATTENDANCE ── */}
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xl">🗓️</span>
+            <h2 className="text-lg font-bold text-[#0f1117]">Attendance</h2>
+            <span className="text-sm text-[#9ca3af] font-normal">({attendance.length} records)</span>
+          </div>
           <div className="card overflow-hidden p-0">
             <table className="data-table">
               <thead><tr><th>Student</th><th>Course</th><th>Session Date</th><th>Status</th><th>Actions</th></tr></thead>
@@ -670,10 +656,17 @@ export default function AdminDashboard() {
             </table>
             {attendance.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No attendance records yet</div>}
           </div>
-        )}
+        </section>
 
-        {/* RESULTS */}
-        {tab === 'Results' && (
+        <hr className="border-[#e8eaf0] mb-10" />
+
+        {/* ── RESULTS ── */}
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xl">📊</span>
+            <h2 className="text-lg font-bold text-[#0f1117]">Results</h2>
+            <span className="text-sm text-[#9ca3af] font-normal">({results.length} records)</span>
+          </div>
           <div className="card overflow-hidden p-0">
             <table className="data-table">
               <thead><tr><th>Student</th><th>Course</th><th>CA</th><th>Exam</th><th>Total Score</th><th>Grade</th><th>Actions</th></tr></thead>
@@ -693,10 +686,16 @@ export default function AdminDashboard() {
             </table>
             {results.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No results yet</div>}
           </div>
-        )}
+        </section>
 
-        {/* GRADES / CGPA */}
-        {tab === 'Grade / CGPA' && (
+        <hr className="border-[#e8eaf0] mb-10" />
+
+        {/* ── GRADE / CGPA ── */}
+        <section className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xl">🎓</span>
+            <h2 className="text-lg font-bold text-[#0f1117]">Grade / CGPA</h2>
+          </div>
           <div className="space-y-4">
             {Object.entries(gradeGroups).map(([studentId, group]) => {
               const cgpa = group.results.reduce((sum, result) => sum + (gradePoints[result.grade] ?? 0), 0) / group.results.length;
@@ -714,7 +713,8 @@ export default function AdminDashboard() {
             })}
             {Object.keys(gradeGroups).length === 0 && <div className="card text-center py-8 text-[#9ca3af] text-sm">No published grades yet</div>}
           </div>
-        )}
+        </section>
+
       </div>
 
       {/* Create Lecturer Modal */}
