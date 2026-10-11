@@ -443,16 +443,17 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        <hr className="border-[#e8eaf0] mb-10" />
+        <hr className="border-[#e8eaf0] mb-8" />
 
         {/* ── USERS ── */}
-        <section className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-xl">👥</span>
-            <h2 className="text-lg font-bold text-[#0f1117]">Users</h2>
-            <span className="text-sm text-[#9ca3af] font-normal">({users.length} total)</span>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <section>
+          {/* Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 flex-1">
+              <span className="text-xl">👥</span>
+              <h2 className="text-lg font-bold text-[#0f1117]">Users</h2>
+              <span className="text-sm text-[#9ca3af] font-normal">({filteredUsers.length} shown)</span>
+            </div>
             <input className="input max-w-xs" placeholder="Search name or email…" value={search} onChange={e => setSearch(e.target.value)} />
             <select className="input w-auto" value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
               <option value="all">All roles</option>
@@ -461,257 +462,247 @@ export default function AdminDashboard() {
               <option value="admin">Admins</option>
             </select>
           </div>
-          <div className="card overflow-hidden p-0">
-            <table className="data-table">
-              <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
-              <tbody>
-                {filteredUsers.map(u => (
-                  <tr key={u.id}>
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#eef1fe] flex items-center justify-center text-[#4f6ef7] font-bold text-xs shrink-0">
-                          {u.full_name?.[0]}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-[#0f1117]">{u.full_name}</p>
-                          <p className="text-xs text-[#9ca3af]">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td><span className={roleColor[u.role]}>{u.role}</span></td>
-                    <td>
-                      <span className={`badge ${u.is_active ? 'badge-green' : 'badge-red'}`}>
-                        {u.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="text-[#9ca3af]">{new Date(u.created_at).toLocaleDateString()}</td>
-                    <td>
-                      <div className="flex gap-2 flex-wrap">
-                        {(u.role === 'student' || u.role === 'lecturer') && (
-                          <button onClick={() => openDetail(u.role, u.id)}
-                            className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
-                            View Data
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handlePrintUser(u)}
-                          className="text-xs px-2.5 py-1 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium flex items-center gap-1"
-                          title="Print user report"
-                        >
-                          🖨️ Print
-                        </button>
-                        {u.id !== user?.id && (
-                          <button onClick={() => toggleStatus(u.id, u.is_active)}
-                            className={`text-xs px-2.5 py-1 rounded-lg font-medium ${
-                              u.is_active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100'
-                            }`}>
-                            {u.is_active ? 'Deactivate' : 'Reactivate'}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredUsers.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No users found</div>}
-          </div>
-        </section>
 
-        <hr className="border-[#e8eaf0] mb-10" />
+          {/* User Cards */}
+          <div className="space-y-5">
+            {filteredUsers.map(u => {
+              // ── derive per-user data from loaded datasets ──
+              const uEnrolments   = u.role === 'student'  ? enrolments.filter(e => e.users?.id === u.id)  : [];
+              const uResults      = u.role === 'student'  ? results.filter(r => r.student_id === u.id)    : [];
+              const uAttendance   = u.role === 'student'  ? attendance.filter(a => a.users?.id === u.id)  : [];
+              const uCourses      = u.role === 'lecturer' ? courses.filter(c => c.lecturer_id === u.id)   : [];
+              const uAssignments  = u.role === 'lecturer' ? assignments.filter(a => uCourses.some(c => c.id === a.course_id)) : [];
 
-        {/* ── COURSES ── */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <span className="text-xl">📚</span>
-              <h2 className="text-lg font-bold text-[#0f1117]">Courses</h2>
-              <span className="text-sm text-[#9ca3af] font-normal">({courses.length} total)</span>
-            </div>
-            <button className="btn-primary text-sm" onClick={() => setCourseModal(true)}>+ Create Course</button>
-          </div>
-          <div className="card overflow-hidden p-0">
-            <table className="data-table">
-              <thead><tr><th>Course</th><th>Lecturer</th><th>Semester</th><th>Students</th><th>Actions</th></tr></thead>
-              <tbody>
-                {courses.map(c => (
-                  <tr key={c.id}>
-                    <td>
-                      <p className="font-semibold text-[#0f1117]">{c.course_title}</p>
-                      <p className="text-xs text-[#9ca3af]">{c.course_code}</p>
-                    </td>
-                    <td>
-                      <p className="text-sm text-[#0f1117]">{c.users?.full_name}</p>
-                      <p className="text-xs text-[#9ca3af]">{c.users?.email}</p>
-                    </td>
-                    <td className="text-[#6b7280] text-sm">{c.semester}</td>
-                    <td><span className="badge-blue">{c.studentCount ?? 0}</span></td>
-                    <td>
-                      <div className="flex gap-2">
-                        <button onClick={() => openDetail('course', c.id)}
-                          className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
-                          View Students
-                        </button>
-                        <button onClick={() => { setReassignModal(c); setReassignLecturer(c.lecturer_id); }}
-                          className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium">
-                          Reassign
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {courses.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No courses yet</div>}
-          </div>
-        </section>
+              const cgpa = uResults.length > 0
+                ? (uResults.reduce((s, r) => s + (gradePoints[r.grade] ?? 0), 0) / uResults.length).toFixed(2)
+                : null;
 
-        <hr className="border-[#e8eaf0] mb-10" />
+              const presentSessions = uAttendance.filter(a => a.status === 'present' || a.status === 'late').length;
+              const attendanceRate  = uAttendance.length > 0
+                ? Math.round(presentSessions / uAttendance.length * 100)
+                : null;
 
-        {/* ── ENROLMENTS ── */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <span className="text-xl">🔗</span>
-              <h2 className="text-lg font-bold text-[#0f1117]">Enrolments</h2>
-              <span className="text-sm text-[#9ca3af] font-normal">({enrolments.length} total)</span>
-            </div>
-            <button className="btn-primary text-sm" onClick={() => setEnrolModal(true)}>+ Enrol Student</button>
-          </div>
-          <div className="card overflow-hidden p-0">
-            <table className="data-table">
-              <thead><tr><th>Student</th><th>Course</th><th>Enrolled</th></tr></thead>
-              <tbody>
-                {enrolments.map(e => (
-                  <tr key={e.id}>
-                    <td>
-                      <p className="font-semibold text-[#0f1117]">{e.users?.full_name}</p>
-                      <p className="text-xs text-[#9ca3af]">{e.users?.email}</p>
-                    </td>
-                    <td>
-                      <p className="font-medium text-[#0f1117]">{e.courses?.course_title}</p>
-                      <p className="text-xs text-[#9ca3af]">{e.courses?.course_code}</p>
-                    </td>
-                    <td className="text-[#9ca3af]">{new Date(e.enrolled_at).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {enrolments.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No enrolments yet</div>}
-          </div>
-        </section>
+              const lecturerTotalStudents = uCourses.reduce((s, c) => s + (c.studentCount ?? 0), 0);
 
-        <hr className="border-[#e8eaf0] mb-10" />
-
-        {/* ── ASSIGNMENTS ── */}
-        <section className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-xl">📝</span>
-            <h2 className="text-lg font-bold text-[#0f1117]">Assignments</h2>
-            <span className="text-sm text-[#9ca3af] font-normal">({assignments.length} total)</span>
-          </div>
-          <div className="card overflow-hidden p-0">
-            <table className="data-table">
-              <thead><tr><th>Assignment</th><th>Course</th><th>Due</th><th>Max Score</th><th>Submissions</th><th>Graded</th></tr></thead>
-              <tbody>
-                {assignments.map(assignment => (
-                  <tr key={assignment.id}>
-                    <td className="font-semibold text-[#0f1117]">{assignment.title}</td>
-                    <td><p className="font-medium text-[#0f1117]">{assignment.courses?.course_title}</p><p className="text-xs text-[#9ca3af]">{assignment.courses?.course_code}</p></td>
-                    <td className="text-[#6b7280]">{new Date(assignment.due_date).toLocaleDateString()}</td>
-                    <td className="text-[#6b7280]">{assignment.max_score}</td>
-                    <td><span className="badge-blue">{assignment.submissionCount}</span></td>
-                    <td><span className="badge-green">{assignment.gradedCount}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {assignments.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No assignments yet</div>}
-          </div>
-        </section>
-
-        <hr className="border-[#e8eaf0] mb-10" />
-
-        {/* ── ATTENDANCE ── */}
-        <section className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-xl">🗓️</span>
-            <h2 className="text-lg font-bold text-[#0f1117]">Attendance</h2>
-            <span className="text-sm text-[#9ca3af] font-normal">({attendance.length} records)</span>
-          </div>
-          <div className="card overflow-hidden p-0">
-            <table className="data-table">
-              <thead><tr><th>Student</th><th>Course</th><th>Session Date</th><th>Status</th><th>Actions</th></tr></thead>
-              <tbody>
-                {attendance.map(record => (
-                  <tr key={record.id}>
-                    <td><p className="font-semibold text-[#0f1117]">{record.users?.full_name}</p><p className="text-xs text-[#9ca3af]">{record.users?.email}</p></td>
-                    <td><p className="font-medium text-[#0f1117]">{record.courses?.course_title}</p><p className="text-xs text-[#9ca3af]">{record.courses?.course_code}</p></td>
-                    <td className="text-[#6b7280]">{new Date(record.session_date).toLocaleDateString()}</td>
-                    <td><span className={record.status === 'present' ? 'badge-green' : record.status === 'late' ? 'badge-amber' : 'badge-red'}>{record.status}</span></td>
-                    <td><button onClick={() => setEditModal({ type: 'attendance', data: record })} className="text-xs px-2.5 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">Edit</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {attendance.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No attendance records yet</div>}
-          </div>
-        </section>
-
-        <hr className="border-[#e8eaf0] mb-10" />
-
-        {/* ── RESULTS ── */}
-        <section className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-xl">📊</span>
-            <h2 className="text-lg font-bold text-[#0f1117]">Results</h2>
-            <span className="text-sm text-[#9ca3af] font-normal">({results.length} records)</span>
-          </div>
-          <div className="card overflow-hidden p-0">
-            <table className="data-table">
-              <thead><tr><th>Student</th><th>Course</th><th>CA</th><th>Exam</th><th>Total Score</th><th>Grade</th><th>Actions</th></tr></thead>
-              <tbody>
-                {results.map(result => (
-                  <tr key={result.id}>
-                    <td><p className="font-semibold text-[#0f1117]">{result.users?.full_name}</p><p className="text-xs text-[#9ca3af]">{result.users?.email}</p></td>
-                    <td><p className="font-medium text-[#0f1117]">{result.courses?.course_title}</p><p className="text-xs text-[#9ca3af]">{result.courses?.course_code}</p></td>
-                    <td className="text-[#6b7280]">{result.ca_score === null ? 'N/A' : result.ca_score.toFixed(2)}</td>
-                    <td className="text-[#9ca3af]">{result.exam_score === null ? 'Not recorded' : result.exam_score}</td>
-                    <td className="font-bold text-[#0f1117]">{result.total_score}</td>
-                    <td><span className={result.grade === 'F' ? 'badge-red' : 'badge-green'}>{result.grade}</span></td>
-                    <td><button onClick={() => setEditModal({ type: 'grade', data: result })} className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium">Edit</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {results.length === 0 && <div className="text-center py-8 text-[#9ca3af] text-sm">No results yet</div>}
-          </div>
-        </section>
-
-        <hr className="border-[#e8eaf0] mb-10" />
-
-        {/* ── GRADE / CGPA ── */}
-        <section className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-xl">🎓</span>
-            <h2 className="text-lg font-bold text-[#0f1117]">Grade / CGPA</h2>
-          </div>
-          <div className="space-y-4">
-            {Object.entries(gradeGroups).map(([studentId, group]) => {
-              const cgpa = group.results.reduce((sum, result) => sum + (gradePoints[result.grade] ?? 0), 0) / group.results.length;
               return (
-                <div key={studentId} className="card overflow-hidden p-0">
-                  <div className="flex justify-between items-center px-5 py-4 border-b border-[#e8eaf0]">
-                    <div><p className="font-semibold text-[#0f1117]">{group.student?.full_name}</p><p className="text-xs text-[#9ca3af]">{group.student?.email}</p></div>
-                    <div className="text-right"><p className="text-xs text-[#6b7280]">CGPA</p><p className="text-xl font-bold text-[#4f6ef7]">{cgpa.toFixed(2)} / 5.00</p></div>
+                <div key={u.id} className="card p-0 overflow-hidden">
+
+                  {/* ── User header row ── */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 border-b border-[#e8eaf0]">
+
+                    {/* Avatar + identity */}
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#eef1fe] flex items-center justify-center text-[#4f6ef7] font-bold text-sm shrink-0">
+                        {u.full_name?.[0]}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-[#0f1117]">{u.full_name}</p>
+                          <span className={roleColor[u.role]}>{u.role}</span>
+                          <span className={`badge ${u.is_active ? 'badge-green' : 'badge-red'}`}>
+                            {u.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-[#9ca3af] truncate">{u.email} · Joined {new Date(u.created_at).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2 flex-wrap shrink-0">
+                      {(u.role === 'student' || u.role === 'lecturer') && (
+                        <button onClick={() => openDetail(u.role, u.id)}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
+                          Full Details
+                        </button>
+                      )}
+                      <button onClick={() => handlePrintUser(u)}
+                        className="text-xs px-3 py-1.5 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium flex items-center gap-1">
+                        🖨️ Print
+                      </button>
+                      {u.id !== user?.id && (
+                        <button onClick={() => toggleStatus(u.id, u.is_active)}
+                          className={`text-xs px-3 py-1.5 rounded-lg font-medium ${
+                            u.is_active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100'
+                          }`}>
+                          {u.is_active ? 'Deactivate' : 'Reactivate'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <table className="data-table"><thead><tr><th>Course</th><th>Total Score</th><th>Grade</th><th>Grade Point</th></tr></thead><tbody>
-                    {group.results.map(result => <tr key={result.id}><td>{result.courses?.course_title} <span className="text-xs text-[#9ca3af]">({result.courses?.course_code})</span></td><td>{result.total_score}</td><td><span className="badge-blue">{result.grade}</span></td><td>{gradePoints[result.grade] ?? 0}</td></tr>)}
-                  </tbody></table>
+
+                  {/* ── STUDENT data ── */}
+                  {u.role === 'student' && (
+                    <div className="p-5 space-y-4">
+
+                      {/* Summary stat pills */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="bg-[#f8f9fc] rounded-xl p-3 text-center">
+                          <p className="text-lg font-bold text-[#0f1117]">{uEnrolments.length}</p>
+                          <p className="text-xs text-[#9ca3af] mt-0.5">Enrolled Courses</p>
+                        </div>
+                        <div className="bg-[#f8f9fc] rounded-xl p-3 text-center">
+                          <p className="text-lg font-bold text-[#0f1117]">{uResults.length}</p>
+                          <p className="text-xs text-[#9ca3af] mt-0.5">Results</p>
+                        </div>
+                        <div className="bg-[#f8f9fc] rounded-xl p-3 text-center">
+                          <p className="text-lg font-bold text-[#4f6ef7]">{cgpa ?? '—'}</p>
+                          <p className="text-xs text-[#9ca3af] mt-0.5">CGPA / 5.00</p>
+                        </div>
+                        <div className="bg-[#f8f9fc] rounded-xl p-3 text-center">
+                          <p className="text-lg font-bold text-[#0f1117]">{attendanceRate !== null ? `${attendanceRate}%` : '—'}</p>
+                          <p className="text-xs text-[#9ca3af] mt-0.5">Attendance</p>
+                        </div>
+                      </div>
+
+                      {/* Enrolled courses with grades */}
+                      {uEnrolments.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-2">Courses & Grades</p>
+                          <div className="rounded-xl overflow-hidden border border-[#e8eaf0]">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="bg-[#f8f9fc] text-xs text-[#6b7280]">
+                                  <th className="text-left px-4 py-2 font-semibold">Course</th>
+                                  <th className="text-left px-4 py-2 font-semibold">Semester</th>
+                                  <th className="text-center px-4 py-2 font-semibold">Total Score</th>
+                                  <th className="text-center px-4 py-2 font-semibold">Grade</th>
+                                  <th className="text-center px-4 py-2 font-semibold">Grade Pt</th>
+                                  <th className="text-center px-4 py-2 font-semibold">Attendance</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {uEnrolments.map((enrol, idx) => {
+                                  const courseResult = uResults.find(r => r.course_id === enrol.courses?.id || r.courses?.id === enrol.courses?.id);
+                                  const courseAttendance = uAttendance.filter(a => a.courses?.id === enrol.courses?.id);
+                                  const presentInCourse = courseAttendance.filter(a => a.status === 'present' || a.status === 'late').length;
+                                  const courseAttRate = courseAttendance.length > 0
+                                    ? Math.round(presentInCourse / courseAttendance.length * 100)
+                                    : null;
+                                  return (
+                                    <tr key={idx} className="border-t border-[#f3f4f6] hover:bg-[#fafbff]">
+                                      <td className="px-4 py-2.5">
+                                        <p className="font-medium text-[#0f1117]">{enrol.courses?.course_title}</p>
+                                        <p className="text-xs text-[#9ca3af]">{enrol.courses?.course_code}</p>
+                                      </td>
+                                      <td className="px-4 py-2.5 text-xs text-[#6b7280]">{enrol.courses?.semester ?? '—'}</td>
+                                      <td className="px-4 py-2.5 text-center font-semibold text-[#0f1117]">
+                                        {courseResult ? courseResult.total_score : <span className="text-[#9ca3af]">—</span>}
+                                      </td>
+                                      <td className="px-4 py-2.5 text-center">
+                                        {courseResult
+                                          ? <span className={courseResult.grade === 'F' ? 'badge-red' : 'badge-green'}>{courseResult.grade}</span>
+                                          : <span className="text-[#9ca3af] text-xs">—</span>}
+                                      </td>
+                                      <td className="px-4 py-2.5 text-center text-[#6b7280] text-sm">
+                                        {courseResult ? (gradePoints[courseResult.grade] ?? 0) : '—'}
+                                      </td>
+                                      <td className="px-4 py-2.5 text-center text-sm">
+                                        {courseAttRate !== null
+                                          ? <span className={`font-medium ${courseAttRate >= 75 ? 'text-green-600' : 'text-red-500'}`}>{courseAttRate}%</span>
+                                          : <span className="text-[#9ca3af]">—</span>}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+
+                      {uEnrolments.length === 0 && (
+                        <p className="text-sm text-[#9ca3af] italic">Not enrolled in any courses yet.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── LECTURER data ── */}
+                  {u.role === 'lecturer' && (
+                    <div className="p-5 space-y-4">
+
+                      {/* Summary stat pills */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-[#f8f9fc] rounded-xl p-3 text-center">
+                          <p className="text-lg font-bold text-[#0f1117]">{uCourses.length}</p>
+                          <p className="text-xs text-[#9ca3af] mt-0.5">Courses</p>
+                        </div>
+                        <div className="bg-[#f8f9fc] rounded-xl p-3 text-center">
+                          <p className="text-lg font-bold text-[#0f1117]">{lecturerTotalStudents}</p>
+                          <p className="text-xs text-[#9ca3af] mt-0.5">Total Students</p>
+                        </div>
+                        <div className="bg-[#f8f9fc] rounded-xl p-3 text-center">
+                          <p className="text-lg font-bold text-[#0f1117]">{uAssignments.length}</p>
+                          <p className="text-xs text-[#9ca3af] mt-0.5">Assignments</p>
+                        </div>
+                      </div>
+
+                      {/* Courses table */}
+                      {uCourses.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold text-[#6b7280] uppercase tracking-wide mb-2">Assigned Courses</p>
+                          <div className="rounded-xl overflow-hidden border border-[#e8eaf0]">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="bg-[#f8f9fc] text-xs text-[#6b7280]">
+                                  <th className="text-left px-4 py-2 font-semibold">Course</th>
+                                  <th className="text-left px-4 py-2 font-semibold">Semester</th>
+                                  <th className="text-center px-4 py-2 font-semibold">Students</th>
+                                  <th className="text-center px-4 py-2 font-semibold">Materials</th>
+                                  <th className="text-center px-4 py-2 font-semibold">Assignments</th>
+                                  <th className="text-center px-4 py-2 font-semibold">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {uCourses.map((c, idx) => (
+                                  <tr key={idx} className="border-t border-[#f3f4f6] hover:bg-[#fafbff]">
+                                    <td className="px-4 py-2.5">
+                                      <p className="font-medium text-[#0f1117]">{c.course_title}</p>
+                                      <p className="text-xs text-[#9ca3af]">{c.course_code}</p>
+                                    </td>
+                                    <td className="px-4 py-2.5 text-xs text-[#6b7280]">{c.semester}</td>
+                                    <td className="px-4 py-2.5 text-center"><span className="badge-blue">{c.studentCount ?? 0}</span></td>
+                                    <td className="px-4 py-2.5 text-center text-[#6b7280]">{c.materialCount ?? 0}</td>
+                                    <td className="px-4 py-2.5 text-center text-[#6b7280]">{c.assignmentCount ?? 0}</td>
+                                    <td className="px-4 py-2.5 text-center">
+                                      <div className="flex gap-1.5 justify-center">
+                                        <button onClick={() => openDetail('course', c.id)}
+                                          className="text-xs px-2 py-1 rounded-lg bg-[#eef1fe] text-[#4f6ef7] hover:bg-blue-100 font-medium">
+                                          Students
+                                        </button>
+                                        <button onClick={() => { setReassignModal(c); setReassignLecturer(c.lecturer_id); }}
+                                          className="text-xs px-2 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 font-medium">
+                                          Reassign
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+
+                      {uCourses.length === 0 && (
+                        <p className="text-sm text-[#9ca3af] italic">No courses assigned yet.</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── ADMIN data ── */}
+                  {u.role === 'admin' && (
+                    <div className="px-5 py-4">
+                      <p className="text-sm text-[#9ca3af]">System Administrator — full platform access.</p>
+                    </div>
+                  )}
+
                 </div>
               );
             })}
-            {Object.keys(gradeGroups).length === 0 && <div className="card text-center py-8 text-[#9ca3af] text-sm">No published grades yet</div>}
+
+            {filteredUsers.length === 0 && (
+              <div className="card text-center py-12 text-[#9ca3af] text-sm">No users match your search.</div>
+            )}
           </div>
         </section>
 
